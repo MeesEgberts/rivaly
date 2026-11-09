@@ -128,10 +128,6 @@ export function AthleteChooseScreen({ fixture, mode, position }: Props) {
                 <AthleteRow
                   key={athlete.id}
                   athlete={athlete}
-                  place={{
-                    text: isRanking ? `Plek ${position + 1}` : "Kies",
-                    isChosen: false,
-                  }}
                   onPress={() => choose(athlete)}
                   isLast={index === athletes.length - 1}
                 />
