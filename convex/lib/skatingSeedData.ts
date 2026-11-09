@@ -1,4 +1,5 @@
 import type { SkatingCategory } from "../../modules/skating/categories";
+import { SHORTTRACK_FIELD, SPEEDSKATING_FIELD } from "./skatingFields2026";
 
 /**
  * Schaatsen en shorttrack, seizoen 2026/27: atleten per categorie en de
@@ -25,7 +26,7 @@ const women = (name: string, nation: string): SeedSkater => ({
   category: "women",
 });
 
-export const SPEEDSKATERS: SeedSkater[] = [
+const SPEEDSKATING_FAVOURITES: SeedSkater[] = [
   men("Jordan Stolz", "USA"),
   men("Jenning de Boo", "NED"),
   men("Joep Wennemars", "NED"),
@@ -82,7 +83,7 @@ export const SPEEDSKATERS: SeedSkater[] = [
   women("Karolina Bosiek", "POL"),
 ];
 
-export const SHORTTRACKERS: SeedSkater[] = [
+const SHORTTRACK_FAVOURITES: SeedSkater[] = [
   men("Jens van 't Wout", "NED"),
   men("Melle van 't Wout", "NED"),
   men("Friso Emons", "NED"),
@@ -122,6 +123,25 @@ export const SHORTTRACKERS: SeedSkater[] = [
   women("Zhang Chutong", "CHN"),
   women("Petra Jászapáti", "HUN"),
 ];
+
+/** Zonder dubbelen: dezelfde naam (hoofdletters negeren) in dezelfde categorie. */
+function merge(...lists: SeedSkater[][]): SeedSkater[] {
+  const result = new Map<string, SeedSkater>();
+
+  for (const skater of lists.flat()) {
+    const key = `${skater.category}:${skater.name.toLowerCase()}`;
+
+    if (!result.has(key)) {
+      result.set(key, skater);
+    }
+  }
+
+  return [...result.values()];
+}
+
+/** Iedereen die we kennen: de favorieten plus het veld van 2026. */
+export const SPEEDSKATERS = merge(SPEEDSKATING_FAVOURITES, SPEEDSKATING_FIELD);
+export const SHORTTRACKERS = merge(SHORTTRACK_FAVOURITES, SHORTTRACK_FIELD);
 
 /** Landen die een aflossingsploeg sturen, met hun Nederlandse naam. */
 export const RELAY_NATIONS: { nation: string; name: string }[] = [
