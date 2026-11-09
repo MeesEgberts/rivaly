@@ -33,6 +33,7 @@ export function Screen({ children, footer }: Props) {
 }
 
 export const Section = FieldGroup.Section;
+export const SectionFooter = FieldGroup.SectionFooter;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

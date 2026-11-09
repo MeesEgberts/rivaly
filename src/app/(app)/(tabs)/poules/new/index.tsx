@@ -1,50 +1,50 @@
-import { Picker, TextInput } from "@expo/ui";
+import { TextInput } from "@expo/ui";
 import { useMutation, useQuery } from "convex/react";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 
 import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
 import { LoadingScreen } from "@/components/loading-screen";
 import { AppText } from "@/components/ui/app-text";
+import { LabeledPicker } from "@/components/ui/labeled-picker";
 import { NavRow } from "@/components/ui/nav-row";
 import { ModalToolbar } from "@/components/ui/modal-toolbar";
-import { Screen, Section } from "@/components/ui/screen";
-import { formatDate } from "@/utils/format";
+import { Screen, Section, SectionFooter } from "@/components/ui/screen";
+import { useNewPouleDraft } from "@/hooks/use-new-poule-draft";
+import { catalogSubtitle, sportIcon } from "@/utils/event-catalog";
 import { showError } from "@/utils/error-message";
 
 /**
- * Poule aanmaken in drie stappen op één scherm: naam, wedstrijden kiezen,
- * puntentelling. Stap drie heeft een standaardwaarde en mag worden overgeslagen.
+ * Poule aanmaken op één scherm: naam, wedstrijden (gekozen in een apart
+ * zoekscherm) en puntentelling. De puntentelling heeft een standaardwaarde.
  */
 export default function NewPouleScreen() {
   const catalog = useQuery(api.events.catalog);
   const create = useMutation(api.poules.create);
+  const { selectedEventIds } = useNewPouleDraft();
 
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("");
-  const [selected, setSelected] = useState<Set<Id<"events">>>(new Set());
   const [presetKey, setPresetKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const chosenEvents = useMemo(
+    () => (catalog ?? []).filter((event) => selectedEventIds.has(event._id)),
+    [catalog, selectedEventIds],
+  );
+
   // Presets die élk gekozen evenement kent; bij één module zijn dat gewoon de presets van die module.
   const presets = useMemo(() => {
-    if (!catalog) {
+    if (chosenEvents.length === 0) {
       return [];
     }
 
-    const chosen = catalog.filter((event) => selected.has(event._id));
-
-    if (chosen.length === 0) {
-      return [];
-    }
-
-    return chosen[0].presets.filter((preset) =>
-      chosen.every((event) =>
+    return chosenEvents[0].presets.filter((preset) =>
+      chosenEvents.every((event) =>
         event.presets.some((candidate) => candidate.key === preset.key),
       ),
     );
-  }, [catalog, selected]);
+  }, [chosenEvents]);
 
   const activePreset =
     presets.find((preset) => preset.key === presetKey) ?? presets[0] ?? null;
@@ -52,18 +52,6 @@ export default function NewPouleScreen() {
   if (catalog === undefined) {
     return <LoadingScreen />;
   }
-
-  const toggle = (eventId: Id<"events">, on: boolean) => {
-    const next = new Set(selected);
-
-    if (on) {
-      next.add(eventId);
-    } else {
-      next.delete(eventId);
-    }
-
-    setSelected(next);
-  };
 
   const canSubmit = name.trim().length >= 2 && activePreset !== null;
 
@@ -78,11 +66,11 @@ export default function NewPouleScreen() {
       const { pouleId } = await create({
         name,
         emoji: emoji.trim() || undefined,
-        eventIds: [...selected],
+        eventIds: chosenEvents.map((event) => event._id),
         presetKey: activePreset.key,
       });
 
-      router.dismiss();
+      router.back();
       router.push(`/poules/${pouleId}`);
     } catch (error) {
       showError("Aanmaken mislukt", error);
@@ -116,49 +104,43 @@ export default function NewPouleScreen() {
       </Section>
 
       <Section title="Wedstrijden en toernooien">
-        {catalog.length === 0 ? (
-          <AppText variant="secondary">
-            Er staan nog geen evenementen in de catalogus.
-          </AppText>
-        ) : (
-          catalog.map((event) => (
-            <NavRow
-              key={event._id}
-              icon={
-                event.moduleKey === "football" ? "soccerball" : "sportscourt"
-              }
-              title={event.name}
-              subtitle={`${event.moduleName} · ${formatDate(event.startsAt)}`}
-              selected={selected.has(event._id)}
-              onPress={() => toggle(event._id, !selected.has(event._id))}
-            />
-          ))
-        )}
+        {chosenEvents.map((event) => (
+          <NavRow
+            key={event._id}
+            icon={sportIcon(event)}
+            title={event.name}
+            subtitle={catalogSubtitle(event)}
+          />
+        ))}
+        <NavRow
+          icon={
+            chosenEvents.length === 0
+              ? "plus.circle.fill"
+              : "pencil.circle.fill"
+          }
+          title={
+            chosenEvents.length === 0 ? "Kies wedstrijden" : "Wijzig keuze"
+          }
+          onPress={() => router.push("/poules/new/events")}
+        />
       </Section>
 
       {activePreset ? (
-        <Section title="Puntentelling">
-          <Picker
-            selectedValue={activePreset.key}
-            onValueChange={(key) => setPresetKey(String(key))}
-          >
-            {presets.map((preset) => (
-              <Picker.Item
-                key={preset.key}
-                label={preset.name}
-                value={preset.key}
-              />
-            ))}
-          </Picker>
-          <AppText variant="caption">{activePreset.description}</AppText>
-        </Section>
-      ) : (
         <Section>
-          <AppText variant="caption">
-            Kies minimaal één wedstrijd of toernooi om verder te gaan.
-          </AppText>
+          <LabeledPicker
+            label="Puntentelling"
+            options={presets.map((preset) => ({
+              value: preset.key,
+              label: preset.name,
+            }))}
+            selectedValue={activePreset.key}
+            onValueChange={setPresetKey}
+          />
+          <SectionFooter>
+            <AppText variant="caption">{activePreset.description}</AppText>
+          </SectionFooter>
         </Section>
-      )}
+      ) : null}
     </Screen>
   );
 }

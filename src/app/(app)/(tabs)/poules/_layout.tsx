@@ -20,7 +20,7 @@ export default function PoulesLayout() {
       </Stack.Screen>
       <Stack.Screen
         name="new"
-        options={{ title: "Nieuwe poule", presentation: "modal" }}
+        options={{ presentation: "modal", headerShown: false }}
       />
       <Stack.Screen
         name="join"
