@@ -6,7 +6,7 @@ import { useSharedValue } from "react-native-reanimated";
 import { Card } from "@/components/cards/card";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { AthleteInfo } from "@/types/athlete";
-import { podiumLayout, type Slots } from "@/utils/athletes";
+import { podiumHint, podiumLayout, type Slots } from "@/utils/athletes";
 
 import { PodiumSlot } from "./podium-slot";
 import { SingleChoiceSlot } from "./single-choice-slot";
@@ -14,37 +14,25 @@ import { SingleChoiceSlot } from "./single-choice-slot";
 interface Props {
   title: string;
   slots: Slots;
-  active: number | null;
   infoOf: (id: string) => AthleteInfo;
-  /** Tik op een lege plek: die plek wordt de plek die je kiest. */
-  onSelect: (position: number) => void;
-  /** Tik op een gevulde plek: open het vervangscherm. */
-  onReplace: (position: number) => void;
+  /** Tik op een plek: open het keuzescherm (kiezen of vervangen). */
+  onOpen: (position: number) => void;
   onSwap: (from: number, to: number) => void;
 }
 
 /**
- * Het podium dat je opbouwt: de treden 2–1–3 (of 4–2–1–3–5), met de plek
- * die je nu kiest in blauw. Bij één keuze is het één vak.
+ * Het podium dat je opbouwt: de treden 2–1–3 (of 4–2–1–3–5), met de
+ * eerstvolgende lege plek in blauw. Tik een plek om een renner te kiezen of
+ * te vervangen. Bij één keuze is het één vak.
  */
-export function PodiumPicker({
-  title,
-  slots,
-  active,
-  infoOf,
-  onSelect,
-  onReplace,
-  onSwap,
-}: Props) {
-  const tapSlot = (position: number) =>
-    slots[position] ? onReplace(position) : onSelect(position);
-
+export function PodiumPicker({ title, slots, infoOf, onOpen, onSwap }: Props) {
   const colors = useAppColors();
   const size = slots.length;
   const layout = useMemo(() => podiumLayout(size), [size]);
   const centers = useSharedValue<number[]>(layout.map(() => 0));
   const filled = slots.filter(Boolean).length;
   const isComplete = filled === size;
+  const next = slots.indexOf(null);
 
   // De metingen komen los binnen; houd ze hier bij en geef steeds de hele
   // lijst door, zodat ze elkaar niet overschrijven.
@@ -86,8 +74,8 @@ export function PodiumPicker({
         {size === 1 ? (
           <SingleChoiceSlot
             athlete={slots[0] ? infoOf(slots[0]) : null}
-            isActive={active === 0}
-            onPress={() => tapSlot(0)}
+            isActive={next === 0}
+            onPress={() => onOpen(0)}
           />
         ) : (
           <View style={styles.podium}>
@@ -111,10 +99,10 @@ export function PodiumPicker({
                     position={position}
                     size={size}
                     athlete={id ? infoOf(id) : null}
-                    isActive={active === position}
+                    isActive={next === position}
                     centers={centers}
                     layout={layout}
-                    onSelect={tapSlot}
+                    onSelect={onOpen}
                     onDrop={onSwap}
                   />
                 </View>
@@ -123,11 +111,9 @@ export function PodiumPicker({
           </View>
         )}
 
-        {size > 1 && filled > 1 ? (
-          <Text style={[styles.footnote, { color: colors.tertiaryLabel }]}>
-            Houd een renner vast en sleep hem naar een andere trede.
-          </Text>
-        ) : null}
+        <Text style={[styles.footnote, { color: colors.tertiaryLabel }]}>
+          {podiumHint(filled, size)}
+        </Text>
       </View>
     </Card>
   );

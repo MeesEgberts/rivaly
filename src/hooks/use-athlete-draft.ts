@@ -6,19 +6,13 @@ import type { Slots } from "@/utils/athletes";
 export interface AthleteDraft {
   /** Vaste plekken; `null` is nog leeg. Bij een keuzevraag is er één plek. */
   slots: Slots;
-  /** De plek die je nu kiest, of `null` als alles gevuld is en niets geselecteerd. */
-  active: number | null;
   /** Atleten die in deze sessie zijn gekozen, zodat hun naam meteen bekend is. */
   known: Map<string, AthleteInfo>;
   isStarted: boolean;
   /** Eenmalig vullen met de opgeslagen voorspelling of uitslag. */
   start: (order: string[], size: number) => void;
-  /** Zet een atleet op de actieve plek en ga door naar de volgende lege. */
-  place: (athlete: AthleteInfo) => void;
-  /** Tik op een trede: die plek wordt actief (nog eens tikken: niet meer). */
-  select: (index: number) => void;
   clear: (index: number) => void;
-  /** Vervangt de atleet op een gevulde plek (vanuit het vervangscherm). */
+  /** Zet een atleet op een plek; staat hij elders, dan wisselen ze. */
   replaceAt: (position: number, athlete: AthleteInfo) => void;
   swap: (from: number, to: number) => void;
 }

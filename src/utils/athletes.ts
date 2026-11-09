@@ -200,26 +200,21 @@ export function stepHeight(position: number, size: number): number {
   return size <= 1 ? max : max - ((max - min) * position) / (size - 1);
 }
 
-/** Uitleg boven de lijst, afhankelijk van welke plek je nu kiest. */
-export function choiceHint(
-  slots: Slots,
-  active: number | null,
-  infoName: (id: string) => string,
-): string {
-  if (active === null) {
-    if (slots.length === 1) {
-      return "Tik je keuze om een ander te kiezen.";
-    }
-
-    const what = slots.length === 3 ? "podium" : `top ${slots.length}`;
-    return `Je ${what} staat. Tik een renner om hem te vervangen.`;
+/** Uitleg onder het podium, afhankelijk van hoe ver je bent. */
+export function podiumHint(filled: number, size: number): string {
+  if (size === 1) {
+    return filled === 0
+      ? "Tik om een renner te kiezen."
+      : "Tik om een andere renner te kiezen.";
   }
 
-  const occupant = slots[active];
-
-  if (occupant) {
-    return `Kies wie ${infoName(occupant)} vervangt`;
+  if (filled === 0) {
+    return "Tik een plek om een renner te kiezen.";
   }
 
-  return slots.length > 1 ? `Kies plek ${active + 1}` : "Kies je renner";
+  if (filled < size) {
+    return "Tik een plek om een renner te kiezen.";
+  }
+
+  return "Tik om te vervangen, houd vast om te verslepen.";
 }

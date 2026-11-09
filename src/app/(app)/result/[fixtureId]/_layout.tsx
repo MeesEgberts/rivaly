@@ -11,7 +11,7 @@ export default function ResultLayout() {
       <AthleteDraftProvider>
         <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
           <Stack.Screen name="index" options={{ title: "Uitslag invoeren" }} />
-          <Stack.Screen name="replace" options={{ title: "Vervang" }} />
+          <Stack.Screen name="choose" options={{ title: "Kies" }} />
         </Stack>
       </AthleteDraftProvider>
     </GestureHandlerRootView>

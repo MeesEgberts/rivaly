@@ -23,15 +23,16 @@ import { AthleteRow } from "./athlete-row";
 interface Props {
   fixture: FixtureDetail;
   mode: "prediction" | "result";
-  /** Plek op het podium die je vervangt, 0 = plek 1. */
+  /** Plek op het podium die je kiest of vervangt, 0 = plek 1. */
   position: number;
 }
 
 /**
- * Een renner op het podium vervangen: favorieten, of zoeken in alle
- * renners via de native zoekbalk onderaan. "Haal weg" maakt de plek leeg.
+ * Een renner kiezen voor een plek op het podium, of de renner daar
+ * vervangen: favorieten, of zoeken in alle renners via de native zoekbalk
+ * onderaan. Bij een gevulde plek maakt de prullenbak hem weer leeg.
  */
-export function AthleteReplaceScreen({ fixture, mode, position }: Props) {
+export function AthleteChooseScreen({ fixture, mode, position }: Props) {
   const colors = useAppColors();
   const draft = useAthleteDraft();
   const participants = useFixtureParticipants(fixture);
@@ -66,6 +67,11 @@ export function AthleteReplaceScreen({ fixture, mode, position }: Props) {
     : null;
   const noun = poolNoun(payload.pool);
   const isRanking = draft.slots.length > 1;
+  const screenTitle = occupant
+    ? `Vervang ${occupant.shortName}`
+    : isRanking
+      ? `Kies plek ${position + 1}`
+      : `Kies je ${noun.singular}`;
 
   const choose = (athlete: AthleteInfo) => {
     tapFeedback();
@@ -80,20 +86,18 @@ export function AthleteReplaceScreen({ fixture, mode, position }: Props) {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: occupant ? `Vervang ${occupant.shortName}` : "Kies renner",
-        }}
-      />
-      <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button
-          icon={Platform.OS === "ios" ? "trash" : undefined}
-          accessibilityLabel="Haal weg"
-          onPress={clear}
-        >
-          Haal weg
-        </Stack.Toolbar.Button>
-      </Stack.Toolbar>
+      <Stack.Screen options={{ title: screenTitle }} />
+      {occupant ? (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon={Platform.OS === "ios" ? "trash" : undefined}
+            accessibilityLabel="Haal weg"
+            onPress={clear}
+          >
+            Haal weg
+          </Stack.Toolbar.Button>
+        </Stack.Toolbar>
+      ) : null}
       <Stack.SearchBar
         placeholder={`Zoek ${noun.singular} of land`}
         hideWhenScrolling={false}

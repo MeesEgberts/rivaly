@@ -47,7 +47,7 @@ export function SingleChoiceSlot({ athlete, isActive, onPress }: Props) {
             tintColor={colors.accent as string}
           />
           <Text style={[styles.empty, { color: colors.accent }]}>
-            Kies hieronder
+            Kies je renner
           </Text>
         </View>
       )}
