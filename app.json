@@ -10,7 +10,10 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "nl.beyondweb.rivaly",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +36,13 @@
         }
       ],
       "@clerk/expo",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@clerk/expo-native-components",
+        {
+          "theme": "./clerk-theme.json"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

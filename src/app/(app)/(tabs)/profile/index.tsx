@@ -23,6 +23,7 @@ export default function ProfileScreen() {
           icon="person.crop.circle.fill"
           title={me?.name ?? "Speler"}
           subtitle={me?.email ?? undefined}
+          onPress={() => router.push("/account")}
         />
       </Section>
 

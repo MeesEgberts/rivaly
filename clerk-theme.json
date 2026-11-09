@@ -1,0 +1,13 @@
+{
+  "colors": {
+    "primary": "#208AEF",
+    "ring": "#208AEF"
+  },
+  "darkColors": {
+    "primary": "#4DA3F5",
+    "ring": "#4DA3F5"
+  },
+  "design": {
+    "borderRadius": 12
+  }
+}

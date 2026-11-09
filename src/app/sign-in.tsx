@@ -1,23 +1,25 @@
-import { useHostedAuth } from "@clerk/expo/hosted-auth";
+import { useSession } from "@clerk/expo";
+import { AuthView } from "@clerk/expo/native-components";
 import { useConvexAuth } from "convex/react";
 import { Redirect } from "expo-router";
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AuthLogo } from "@/components/auth/auth-logo";
 import { LoadingScreen } from "@/components/loading-screen";
-import { ActionBar } from "@/components/ui/action-bar";
-import { ActionButton } from "@/components/ui/action-button";
-import { BrandHero } from "@/components/ui/brand-hero";
-import { showError } from "@/utils/error-message";
 
+/**
+ * Inloggen en registreren via Clerk's native AuthView (SwiftUI/Compose).
+ * Het scherm is niet weg te klikken; zodra Convex de sessie accepteert gaan
+ * we door naar de app, waar `AuthGate` het users-document aanmaakt.
+ *
+ * Doorsturen gebeurt op Convex-auth, net als in `AuthGate`. Kijken we hier
+ * naar de Clerk-sessie, dan is er een moment waarop Clerk al actief is en
+ * Convex nog niet, en sturen de twee schermen elkaar eindeloos door.
+ */
 export default function SignInScreen() {
+  const { isLoaded } = useSession();
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const { startHostedAuth } = useHostedAuth();
-  const [busy, setBusy] = useState(false);
-  const insets = useSafeAreaInsets();
 
-  if (isLoading) {
+  if (!isLoaded || isLoading) {
     return <LoadingScreen />;
   }
 
@@ -25,43 +27,5 @@ export default function SignInScreen() {
     return <Redirect href="/home" />;
   }
 
-  const start = async (mode: "sign-in" | "sign-up") => {
-    setBusy(true);
-
-    try {
-      await startHostedAuth({ mode });
-    } catch (error) {
-      showError("Inloggen mislukt", error);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <View style={styles.container}>
-      <BrandHero
-        title="Rivaly"
-        subtitle="Maak poules met vrienden op voetbal, schaatsen en meer."
-      />
-      <View style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
-        <ActionBar>
-          <ActionButton
-            label="Inloggen"
-            onPress={() => start("sign-in")}
-            disabled={busy}
-          />
-          <ActionButton
-            label="Account maken"
-            variant="secondary"
-            onPress={() => start("sign-up")}
-            disabled={busy}
-          />
-        </ActionBar>
-      </View>
-    </View>
-  );
+  return <AuthView isDismissible={false} logo={<AuthLogo />} />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-});

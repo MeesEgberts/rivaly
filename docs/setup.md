@@ -39,17 +39,48 @@ ontwikkelen: het pusht functies en schema bij elke wijziging.
    EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
    ```
 
-Inloggen gaat via Clerk's hosted Account Portal (`useHostedAuth`). Dat werkt
-in Expo Go; native Google/Apple-knoppen vragen later een development build.
+Inloggen, registreren en accountbeheer lopen via Clerk's **native componenten**
+(`AuthView`, `UserProfileView`; SwiftUI op iOS, Jetpack Compose op Android).
+Die zitten niet in Expo Go: je hebt een development build nodig (stap 4).
+Wil je Google of Apple als inlogmethode, registreer dan de app onder
+**Native applications** in het Clerk-dashboard (bundle-id `nl.beyondweb.rivaly`,
+pakketnaam `nl.beyondweb.rivaly`); zonder die registratie verschijnen de knoppen
+wel, maar geven ze een fout.
 
-## 4. App starten
+Het uiterlijk van de native schermen staat in `clerk-theme.json` (accentkleur,
+hoekstraal). Dat bestand wordt alleen bij prebuild gelezen: na een wijziging
+een nieuwe development build maken.
+
+## 4. Development build
+
+De app draait niet in Expo Go (Clerk's native componenten vereisen eigen
+native code). Maak eenmalig een development build met EAS en herhaal dat
+alleen als native afhankelijkheden, `app.json` of `clerk-theme.json`
+veranderen.
+
+iPhone (vraagt om je Apple Developer-login voor certificaten):
+
+```bash
+eas build --profile development --platform ios
+```
+
+Android:
+
+```bash
+eas build --profile development --platform android
+```
+
+Installeer de build op het toestel (EAS biedt dat na afloop
+aan, of `eas build:run -p ios`) en start daarna Metro:
 
 ```bash
 npx expo start
 ```
 
-Open in Expo Go of een simulator (`i` voor iOS, `a` voor Android). Web is
-bewust uitgeschakeld.
+De development build maakt verbinding met Metro en leest `.env.local`. Web is
+bewust uitgeschakeld. Voor `preview`- en `production`-builds moeten de
+`EXPO_PUBLIC_*`-variabelen als EAS-omgevingsvariabelen staan
+(`eas env:create`), omdat `.env.local` niet wordt meegestuurd.
 
 ## 5. Testdata
 

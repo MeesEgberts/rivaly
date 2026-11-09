@@ -7,6 +7,7 @@ export default function AppLayout() {
     <AuthGate>
       <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="account" options={{ headerShown: false }} />
         <Stack.Screen
           name="events/[eventId]"
           options={{ title: "Programma" }}
