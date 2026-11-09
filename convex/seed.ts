@@ -96,7 +96,7 @@ function matchdayPairs<T>(items: T[], round: number): [T, T][] {
   return pairs;
 }
 
-async function firstAdminOrUser(ctx: MutationCtx): Promise<Id<"users">> {
+export async function firstAdminOrUser(ctx: MutationCtx): Promise<Id<"users">> {
   const users = await ctx.db.query("users").take(50);
   const admin = users.find((user) => user.isAdmin);
   const creator = admin ?? users[0];
@@ -296,6 +296,7 @@ export const testCup = internalMutation({
       type: "pick",
       order: fixtureOrder,
       label: "Welk land maakt de meeste goals?",
+      details: { icon: "flame.fill" },
       startsAt: firstKickoff,
       locksAt: firstKickoff,
       status: "scheduled",
@@ -309,6 +310,7 @@ export const testCup = internalMutation({
       type: "numeric",
       order: fixtureOrder,
       label: "Totaal aantal goals in de groepsfase",
+      details: { icon: "number" },
       startsAt: firstKickoff,
       locksAt: firstKickoff,
       status: "scheduled",
@@ -410,6 +412,7 @@ export const eredivisie = internalMutation({
       type: "pick",
       order: fixtureOrder,
       label: "Wie wordt kampioen?",
+      details: { icon: "trophy.fill" },
       startsAt: firstKickoff,
       locksAt: firstKickoff,
       status: "scheduled",
@@ -423,6 +426,7 @@ export const eredivisie = internalMutation({
       type: "ranking",
       order: fixtureOrder,
       label: "Top 3 van de eindstand",
+      details: { icon: "list.number" },
       startsAt: firstKickoff,
       locksAt: firstKickoff,
       status: "scheduled",
@@ -436,6 +440,7 @@ export const eredivisie = internalMutation({
       type: "pick",
       order: fixtureOrder,
       label: "Wie wordt topscorer?",
+      details: { icon: "soccerball" },
       startsAt: firstKickoff,
       locksAt: firstKickoff,
       status: "scheduled",

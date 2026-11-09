@@ -5,7 +5,10 @@ import {
 
 import type { ScoreDraft } from "@/types/score-entry";
 import type { MatchRowData } from "@/utils/match-rows";
-import type { ParticipantInfo } from "@/utils/participants";
+import {
+  UNKNOWN_PARTICIPANT,
+  type ParticipantInfo,
+} from "@/utils/participants";
 
 /** Teams in de volgorde waarin ze voor het eerst in het programma staan. */
 export function teamsOf(matches: MatchRowData[]): string[] {
@@ -54,7 +57,7 @@ export function predictedGroupTable(
   const rows = computeGroupTable(teamsOf(matches), scored);
 
   const info = (teamId: string): ParticipantInfo =>
-    infoById.get(teamId) ?? { name: "Onbekend", code: "?" };
+    infoById.get(teamId) ?? UNKNOWN_PARTICIPANT;
 
   return { rows, info };
 }

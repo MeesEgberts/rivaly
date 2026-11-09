@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { numericFixtureType } from "./numeric";
-import { pickFixtureType, type PickPayload } from "./pick";
+import { OTHER_OPTION_ID, pickFixtureType, type PickPayload } from "./pick";
 import { rankingFixtureType, type RankingPayload } from "./ranking";
 import { scoreFixtureType } from "./score";
 import { defaultRules, resolveRules, scorePrediction } from "../registry";
+import { cyclingModule } from "../cycling/module";
 import { footballPresets } from "../football/module";
 
 describe("score", () => {
@@ -164,6 +165,51 @@ describe("ranking", () => {
       }),
     ).toThrow();
   });
+
+  describe("met optie 'iemand anders'", () => {
+    const withOther: RankingPayload = {
+      ...payload,
+      options: [...payload.options, { id: OTHER_OPTION_ID, label: "Andere renner" }],
+    };
+
+    it("staat in de uitslag meerdere onbekende renners toe", () => {
+      expect(() =>
+        rankingFixtureType.assertResultFits(withOther, {
+          type: "ranking",
+          order: ["a", OTHER_OPTION_ID, OTHER_OPTION_ID],
+        }),
+      ).not.toThrow();
+    });
+
+    it("weigert 'iemand anders' als de optie ontbreekt", () => {
+      expect(() =>
+        rankingFixtureType.assertResultFits(payload, {
+          type: "ranking",
+          order: ["a", "b", OTHER_OPTION_ID],
+        }),
+      ).toThrow();
+    });
+
+    it("weigert 'iemand anders' in een voorspelling", () => {
+      expect(() =>
+        rankingFixtureType.assertPredictionFits(withOther, {
+          type: "ranking",
+          order: ["a", "b", OTHER_OPTION_ID],
+        }),
+      ).toThrow();
+    });
+
+    it("geeft geen punten voor een onbekende renner", () => {
+      const outcome = rankingFixtureType.score({
+        prediction: { type: "ranking", order: ["b", "a", OTHER_OPTION_ID] },
+        result: { type: "ranking", order: ["a", "b", OTHER_OPTION_ID] },
+        rules: rankingFixtureType.defaultRules,
+      });
+
+      // b en a staan wel in de top 3 (1 + 1); "iemand anders" telt niet
+      expect(outcome).toEqual({ points: 2, breakdown: { inTopN: 2 } });
+    });
+  });
 });
 
 describe("numeric", () => {
@@ -240,5 +286,27 @@ describe("registry", () => {
     });
 
     expect(outcome.points).toBe(5);
+  });
+});
+
+describe("wielrennen", () => {
+  it("deelt de preset-sleutels met voetbal, zodat sporten in één poule passen", () => {
+    const footballKeys = footballPresets.map((preset) => preset.key).sort();
+    const cyclingKeys = cyclingModule.presets.map((preset) => preset.key).sort();
+
+    expect(cyclingKeys).toEqual(footballKeys);
+  });
+
+  it("rekent een podium met de klassieke telling", () => {
+    const classic = cyclingModule.presets.find((preset) => preset.key === "classic")!;
+
+    const outcome = scorePrediction({
+      prediction: { type: "ranking", order: ["pogacar", "vdpoel", "pedersen"] },
+      result: { type: "ranking", order: ["vdpoel", "pogacar", "pedersen"] },
+      rules: resolveRules(classic, undefined),
+    });
+
+    // Pedersen exact (5), Pogačar en Van der Poel wel op het podium (2 + 2)
+    expect(outcome.points).toBe(9);
   });
 });

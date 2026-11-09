@@ -2,7 +2,9 @@ import {
   championOf,
   resolveBracket,
 } from "@modules/fixture-types/bracket-tree";
+import { STAGE_PROFILES } from "@modules/cycling/stage-profile";
 import type {
+  FixtureDetails,
   FixturePayload,
   FixturePrediction,
   FixtureResult,
@@ -28,9 +30,40 @@ export function describeFixture(
   return label ?? "Onderdeel";
 }
 
-/** "Rivaly Test Cup · Bonusvragen" */
+/** "Rivaly Test Cup · Bonusvragen", met het parcours erachter als dat er is. */
 export function describeContext(fixture: FixtureDetail): string {
-  return [fixture.eventName, fixture.stageName].filter(Boolean).join(" · ");
+  return [
+    fixture.eventName,
+    fixture.stageName,
+    describeDetails(fixture.details),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** Parcours van een etappe of koers: "Rotterdam – Den Haag · 172 km · Vlak". */
+export function describeDetails(details: FixtureDetails | null): string | null {
+  if (!details) {
+    return null;
+  }
+
+  const profile = details.profile
+    ? STAGE_PROFILES[details.profile].label
+    : null;
+
+  return [describeRoute(details), profile].filter(Boolean).join(" · ") || null;
+}
+
+/** Alleen route en afstand: "Rotterdam – Den Haag · 172 km". */
+export function describeRoute(details: FixtureDetails | null): string | null {
+  if (!details) {
+    return null;
+  }
+
+  const distance =
+    details.distanceKm !== undefined ? `${details.distanceKm} km` : null;
+
+  return [details.route, distance].filter(Boolean).join(" · ") || null;
 }
 
 /** Een voorspelling of uitslag als tekst, bijv. "2 – 1" of "Nederland". */

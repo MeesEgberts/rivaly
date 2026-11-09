@@ -1,3 +1,4 @@
+import { OTHER_OPTION_ID } from "@modules/fixture-types/pick";
 import type {
   FixturePayload,
   FixturePrediction,
@@ -91,7 +92,13 @@ export function draftToValue(
         throw new Error(`Vul alle ${payload.size} plekken in.`);
       }
 
-      if (new Set(order).size !== order.length) {
+      // In een uitslag mag "iemand anders" vaker voorkomen.
+      const named =
+        mode === "result"
+          ? order.filter((id) => id !== OTHER_OPTION_ID)
+          : order;
+
+      if (new Set(named).size !== named.length) {
         throw new Error("Elke deelnemer mag maar één keer voorkomen.");
       }
 

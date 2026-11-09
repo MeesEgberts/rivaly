@@ -68,3 +68,46 @@ export function filterCatalog(
     return haystack.includes(term);
   });
 }
+
+export interface CatalogSeries {
+  /** Uniek over sporten heen, bijv. "cycling:monuments". */
+  key: string;
+  name: string;
+  description: string;
+  icon: SFSymbol;
+  moduleKey: string;
+  eventIds: CatalogEvent["_id"][];
+}
+
+/** Reeksen met minstens twee evenementen, zoals alle monumenten van dit jaar. */
+export function catalogSeries(events: CatalogEvent[]): CatalogSeries[] {
+  const series = new Map<string, CatalogSeries>();
+
+  for (const event of events) {
+    for (const item of event.series) {
+      const key = `${event.moduleKey}:${item.key}`;
+      const existing = series.get(key);
+
+      if (existing) {
+        existing.eventIds.push(event._id);
+        continue;
+      }
+
+      series.set(key, {
+        key,
+        name: item.name,
+        description: item.description,
+        icon: item.icon as SFSymbol,
+        moduleKey: event.moduleKey,
+        eventIds: [event._id],
+      });
+    }
+  }
+
+  return [...series.values()].filter((item) => item.eventIds.length >= 2);
+}
+
+/** "Sanremo, Vlaanderen, Roubaix, Luik en Lombardije · 5 evenementen" */
+export function seriesSubtitle(series: CatalogSeries): string {
+  return `${series.description} · ${series.eventIds.length} evenementen`;
+}

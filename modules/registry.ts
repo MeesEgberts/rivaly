@@ -5,6 +5,7 @@ import { numericFixtureType } from "./fixture-types/numeric";
 import { pickFixtureType } from "./fixture-types/pick";
 import { rankingFixtureType } from "./fixture-types/ranking";
 import { scoreFixtureType } from "./fixture-types/score";
+import { cyclingModule } from "./cycling/module";
 import { footballModule } from "./football/module";
 import type {
   FixtureTypeKey,
@@ -30,6 +31,7 @@ export const fixtureTypes = {
 
 export const modules: Record<string, SportModule> = {
   [footballModule.key]: footballModule,
+  [cyclingModule.key]: cyclingModule,
 };
 
 export function getModule(moduleKey: string): SportModule {

@@ -1,6 +1,10 @@
 import { v, type Infer } from "convex/values";
 
 import {
+  jerseyValidator,
+  stageProfileValidator,
+} from "./cycling/stage-profile";
+import {
   bracketPayloadValidator,
   bracketPredictionValidator,
   bracketResultValidator,
@@ -77,6 +81,19 @@ export const rulesOverridesValidator = v.object({
   bracket: v.optional(bracketRulesValidator),
 });
 
+/** Extra gegevens over een onderdeel, zoals het parcours van een etappe. */
+export const fixtureDetailsValidator = v.object({
+  /** Bijv. "Lille – Arras". */
+  route: v.optional(v.string()),
+  distanceKm: v.optional(v.number()),
+  profile: v.optional(stageProfileValidator),
+  /** Bij een klassementsvraag: welke trui erbij hoort. */
+  jersey: v.optional(jerseyValidator),
+  /** SF Symbol voor op de kaart, bijv. "trophy.fill" bij "Wie wordt kampioen?". */
+  icon: v.optional(v.string()),
+});
+
+export type FixtureDetails = Infer<typeof fixtureDetailsValidator>;
 export type FixturePayload = Infer<typeof fixturePayloadValidator>;
 export type FixtureResult = Infer<typeof fixtureResultValidator>;
 export type FixturePrediction = Infer<typeof fixturePredictionValidator>;

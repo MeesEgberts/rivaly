@@ -1,51 +1,49 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { ProgressBar } from "@/components/ui/progress-bar";
-import { useAppColors } from "@/hooks/use-app-colors";
+import { ProgressCard } from "@/components/cards/progress-card";
+import { useNow } from "@/hooks/use-now";
+import { formatKickoff } from "@/utils/format";
+import { formatTimeLeft } from "@/utils/prediction-cards";
 
 interface Props {
   open: number;
   predicted: number;
-  hasLockedRows: boolean;
+  /** Aftrap van de eerstvolgende open wedstrijd, of `null`. */
+  nextKickoff: number | null;
 }
 
-/** Voortgang en uitleg bovenaan de groepsfase. */
-export function GroupStageIntro({ open, predicted, hasLockedRows }: Props) {
-  const colors = useAppColors();
+/** Voortgang van de groepsfase met de eerstvolgende deadline en uitleg. */
+export function GroupStageIntro({ open, predicted, nextKickoff }: Props) {
+  const now = useNow();
 
-  if (open === 0) {
-    const text = hasLockedRows
-      ? "Alle groepswedstrijden zijn gesloten."
-      : "Er zijn geen groepswedstrijden.";
-
+  if (open === 0 || nextKickoff === null) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.hint, { color: colors.secondaryLabel }]}>
-          {text}
-        </Text>
+        <ProgressCard
+          icon="lock.fill"
+          isMuted
+          title="Alle groepswedstrijden zijn gesloten"
+          answered={predicted}
+          total={open}
+        />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={[styles.count, { color: colors.label }]}>
-          {predicted} van {open} ingevuld
-        </Text>
-      </View>
-      <ProgressBar value={open === 0 ? 0 : predicted / open} />
-      <Text style={[styles.hint, { color: colors.secondaryLabel }]}>
-        Tik op een vak en tik de cijfers. Je stand per groep rekent direct mee
-        en vult straks je knock-outschema.
-      </Text>
+      <ProgressCard
+        icon="soccerball"
+        title={`${predicted} van ${open} ingevuld`}
+        subtitle={`Volgende sluit ${formatKickoff(nextKickoff)} · ${formatTimeLeft(nextKickoff, now)}`}
+        answered={predicted}
+        total={open}
+        footnote="Tik op een vak en tik de cijfers. Je stand per groep rekent direct mee en vult straks je knock-outschema."
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { marginHorizontal: 32, marginTop: 16, gap: 8 },
-  header: { flexDirection: "row", justifyContent: "space-between" },
-  count: { fontSize: 15, fontWeight: "600" },
-  hint: { fontSize: 13, lineHeight: 18 },
+  container: { marginHorizontal: 16, marginTop: 16 },
 });

@@ -96,6 +96,32 @@ speelt (oplopend per ronde), en voor de kampioen. Daarnaast blijven de echte
 knock-outwedstrijden los voorspelbaar als `score` zodra de teams bekend zijn.
 De logica staat in `modules/fixture-types/bracket.ts` en `bracket-tree.ts`.
 
+### Wielrennen (module `cycling`, 9 november 2026)
+
+Wielrennen gebruikt alleen `ranking`, `pick` en `numeric`; er is geen nieuw
+voorspellingstype nodig. Wel drie kleine uitbreidingen die ook voor andere
+sporten bruikbaar zijn:
+
+- **Reeksen** (`SportModule.series`, `events.meta.series`): een evenement
+  kan in reeksen zitten, bijv. *Monumenten*, *Voorjaarsklassiekers*,
+  *Kasseiklassiekers*, *Ardennenklassiekers* of *Grote rondes*. Bij het
+  aanmaken van een poule kies je zo'n reeks in één tik; daarna zijn het
+  gewoon losse evenementen in de poule. Een reeks verschijnt pas als hij
+  minstens twee evenementen in de catalogus heeft.
+- **Parcours per onderdeel** (`fixtures.details`): route, afstand en
+  profiel (vlak, heuvelachtig, bergen, aankomst bergop, tijdrit,
+  ploegentijdrit, kasseien). De lijst toont het profiel als icoon.
+- **"Andere renner"** (`OTHER_OPTION_ID = "other"`): voor als de winnaar niet
+  in de lijst staat. In een keuzevraag is het een gewone optie. In een
+  volgorde mag alleen de uitslag hem gebruiken, ook op meerdere plekken, en
+  levert hij nooit punten op; in het voorspelscherm is hij verborgen.
+
+De puntentelling gebruikt dezelfde sleutels als voetbal (`classic`,
+`allOrNothing`), zodat één poule voetbal en wielrennen kan combineren.
+Seed: `npx convex run seedCycling:calendar2027` (klassiekers, monumenten en
+de Tour 2027; data en starttijden zijn schattingen) en
+`npx convex run seedCycling:testTour` (vijf testetappes, één per dag).
+
 ### Invullen per soort evenement
 
 | Soort | Weergave | Invoer |
@@ -104,6 +130,10 @@ De logica staat in `modules/fixture-types/bracket.ts` en `bracket-tree.ts`.
 | Competitie (Eredivisie) | Tabs *Speelrondes · Extra* | Eén speelronde per scherm, per dag gegroepeerd, pijlen naar vorige/volgende ronde, zelfde cijferblok. |
 | Losse wedstrijd | Modal | Grote wedstrijdkaart met − en +, snelkeuzes (1–0, 2–1, …) en "Nederland wint". |
 | Bonusvragen | Lijst | Keuze als lijst met vinkje; top N door teams in volgorde aan te tikken. |
+| Wielerronde (Tour, Giro, Vuelta) | Tabs *Klassementen · Etappes* | Klassementen: deadlinekaart met voortgang, truikaarten in de kleur van de trui (geel = top 5 eindklassement, groen, bollen, wit) en extra vragen als kaarten. Etappes: strip met alle ritten (nummer, dag, stip/vinkje) en per etappe een swipebare pagina met parcourskaart (route, hoogteprofiel, afstand, soort rit met uitleg voor wie hij gunstig is, aftellen) en een podium 2–1–3 met jouw keuze; na de uitslag zie je per renner of hij goed zat. |
+| Eendagskoers (klassieker) | Eén pagina *Koers* | Parcourskaart met reekslabel ("Monument"), jouw podium en de extra vragen als kaarten. |
+
+Rennerkeuze: vanaf 12 opties een zoekveld (naam of landcode, zonder accenten). Hoogteprofielen zijn gestileerd per soort rit (`STAGE_PROFILES` in `modules/cycling/stage-profile.ts`) en worden met gewone views getekend, zodat er geen native module bij hoeft.
 
 Bracket, cijferblok en wedstrijdkaart zijn eigen React Native-views (geen
 `@expo/ui`-equivalent), met systeemkleuren via `useAppColors` (UIKit op iOS,
@@ -531,6 +561,7 @@ Clients krijgen de nieuwe stand via hun bestaande query-subscriptions.
 | MVP | Handmatig | Admin-schermen in de app (alleen voor platformbeheerders): evenement, fases, deelnemers, onderdelen, uitslagen. Plus een seed-script voor een testtoernooi. |
 | Daarna | Voetbal-API | Importer-action per module (bijv. football-data.org of API-Football) die fixtures en uitslagen synchroniseert via een cron. |
 | Daarna | Schaatsen / multisport | Weinig bruikbare API's; handmatig of semi-automatisch (CSV-import). |
+| Daarna | Wielrennen | Startlijsten en uitslagen (bijv. ProCyclingStats) importeren, zodat elke renner kiesbaar is en "Andere renner" zelden nodig is. |
 | Later | Gebruikers | Eigen toernooien via templates; owner voert zelf uitslagen in. |
 
 De importer-laag is bewust optioneel in het module-contract: een module werkt

@@ -2,6 +2,13 @@ import { ConvexError, v, type Infer } from "convex/values";
 
 import type { FixtureType, ScoreOutcome } from "../types";
 
+/**
+ * Optie "iemand anders" voor als de winnaar niet in de lijst staat, zoals
+ * een verrassende renner. Bij een volgorde mag alleen de uitslag hem
+ * gebruiken, en dan ook meerdere keren.
+ */
+export const OTHER_OPTION_ID = "other";
+
 export const optionValidator = v.object({
   id: v.string(),
   label: v.string(),

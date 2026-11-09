@@ -1,9 +1,17 @@
+import { cyclingStageKinds } from "@modules/cycling/module";
 import { footballStageKinds } from "@modules/football/module";
 
 import type { EventData, EventFixture } from "@/hooks/use-event-data";
 
 export type EventTabKey =
-  "groups" | "bracket" | "knockout" | "matchdays" | "bonus";
+  | "groups"
+  | "bracket"
+  | "knockout"
+  | "matchdays"
+  | "bonus"
+  | "race"
+  | "stages"
+  | "classifications";
 
 export interface EventTab {
   key: EventTabKey;
@@ -28,7 +36,8 @@ function hasFixturesInKind(
 
 /**
  * Welke tabs een evenement krijgt hangt af van zijn fases: een toernooi
- * toont groepen en schema, een competitie speelrondes.
+ * toont groepen en schema, een competitie speelrondes, een wielerronde
+ * etappes en klassementen.
  */
 export function eventTabs(
   stages: EventData["stages"],
@@ -54,6 +63,20 @@ export function eventTabs(
 
   if (hasFixturesInKind(stages, fixtures, footballStageKinds.bonus)) {
     tabs.push({ key: "bonus", label: "Extra" });
+  }
+
+  // Wielrennen: eendagskoers, of etappes plus klassementen bij een ronde.
+  if (hasFixturesInKind(stages, fixtures, cyclingStageKinds.race)) {
+    tabs.push({ key: "race", label: "Koers" });
+  }
+
+  // Klassementen eerst: die vul je vóór de eerste etappe in.
+  if (hasFixturesInKind(stages, fixtures, cyclingStageKinds.classification)) {
+    tabs.push({ key: "classifications", label: "Klassementen" });
+  }
+
+  if (hasFixturesInKind(stages, fixtures, cyclingStageKinds.stages)) {
+    tabs.push({ key: "stages", label: "Etappes" });
   }
 
   return tabs;

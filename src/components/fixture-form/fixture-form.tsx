@@ -51,7 +51,12 @@ export function FixtureForm({
 
     case "ranking":
       return (
-        <RankingFields payload={payload} draft={draft} onChange={onChange} />
+        <RankingFields
+          payload={payload}
+          draft={draft}
+          onChange={onChange}
+          mode={mode}
+        />
       );
 
     case "numeric":

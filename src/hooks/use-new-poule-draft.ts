@@ -5,6 +5,8 @@ import type { Id } from "@convex/_generated/dataModel";
 export interface NewPouleDraft {
   selectedEventIds: Set<Id<"events">>;
   toggleEvent: (eventId: Id<"events">) => void;
+  /** Kiest een hele reeks, of haalt hem weg als hij al helemaal gekozen is. */
+  toggleEvents: (eventIds: Id<"events">[]) => void;
 }
 
 export const NewPouleDraftContext = createContext<NewPouleDraft | null>(null);

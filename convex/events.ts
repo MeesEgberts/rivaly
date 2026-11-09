@@ -45,6 +45,14 @@ export const catalog = query({
           status: event.status,
           startsAt: event.startsAt,
           endsAt: event.endsAt,
+          series: (module.series ?? [])
+            .filter((series) => event.meta.series?.includes(series.key))
+            .map((series) => ({
+              key: series.key,
+              name: series.name,
+              description: series.description,
+              icon: series.icon,
+            })),
           presets: module.presets.map((preset) => ({
             key: preset.key,
             name: preset.name,
@@ -87,6 +95,10 @@ export const get = query({
       status: event.status,
       startsAt: event.startsAt,
       endsAt: event.endsAt,
+      // Reeksen in de volgorde van de module, dus de belangrijkste eerst.
+      seriesNames: (module.series ?? [])
+        .filter((series) => event.meta.series?.includes(series.key))
+        .map((series) => series.memberName),
       stages: stages.map((stage) => ({
         _id: stage._id,
         key: stage.key,
@@ -132,7 +144,10 @@ export const fixtures = query({
       .take(MAX_FIXTURES);
 
     const predictionByFixture = new Map(
-      predictions.map((prediction) => [prediction.fixtureId, prediction.payload]),
+      predictions.map((prediction) => [
+        prediction.fixtureId,
+        prediction.payload,
+      ]),
     );
 
     return fixtures.map((fixture) => ({
@@ -146,6 +161,7 @@ export const fixtures = query({
       status: fixture.status,
       payload: fixture.payload,
       result: fixture.result ?? null,
+      details: fixture.details ?? null,
       myPrediction: predictionByFixture.get(fixture._id) ?? null,
     }));
   },
@@ -196,6 +212,7 @@ export const fixture = query({
       status: fixtureDoc.status,
       payload: fixtureDoc.payload,
       result: fixtureDoc.result ?? null,
+      details: fixtureDoc.details ?? null,
       myPrediction: prediction?.payload ?? null,
       participants: participants.map((participant) => ({
         _id: participant._id,

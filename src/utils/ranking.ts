@@ -1,3 +1,4 @@
+import { OTHER_OPTION_ID } from "@modules/fixture-types/pick";
 import type { FixturePayload } from "@modules/validators";
 
 import type { FixtureDetail } from "@/types/fixture-detail";
@@ -41,5 +42,21 @@ export function rankingOptionTeam(
   const label =
     payload.options.find((option) => option.id === optionId)?.label ?? optionId;
 
-  return { name: label, code: label.slice(0, 3).toUpperCase() };
+  return {
+    name: label,
+    shortName: label,
+    code: label.slice(0, 3).toUpperCase(),
+  };
+}
+
+/**
+ * Opties die je in een voorspelling kunt kiezen. "Iemand anders" is alleen
+ * bedoeld voor de uitslag en levert in een volgorde nooit punten op.
+ */
+export function predictableRankingOptions(payload: RankingPayload) {
+  return payload.options.filter((option) => option.id !== OTHER_OPTION_ID);
+}
+
+export function isOtherOption(optionId: string): boolean {
+  return optionId === OTHER_OPTION_ID;
 }

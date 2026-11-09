@@ -105,3 +105,37 @@ export function toEditableMatches(rows: MatchRowData[]): EditableMatch[] {
       saved: row.prediction,
     }));
 }
+
+/** Hoeveel open wedstrijden je hebt ingevuld, en hoeveel er nog open zijn. */
+export function matchProgress(rows: MatchRowData[]): {
+  open: number;
+  predicted: number;
+} {
+  const open = rows.filter((row) => !row.isLocked);
+
+  return {
+    open: open.length,
+    predicted: open.filter((row) => row.prediction !== null).length,
+  };
+}
+
+/** "4/6" voor een kop, of `null` als er niets meer open staat. */
+export function progressLabel(rows: MatchRowData[]): string | null {
+  const { open, predicted } = matchProgress(rows);
+  return open > 0 ? `${predicted}/${open}` : null;
+}
+
+/** Groepsnaam "Groep A" → "A" voor in het rondje. */
+export function groupLetter(name: string): string {
+  return name
+    .replace(/^Groep\s+/i, "")
+    .trim()
+    .slice(0, 2);
+}
+
+/** Trofee bij de finale, anders twee gekruiste vlaggen. */
+export function knockoutRoundIcon(
+  name: string,
+): "trophy.fill" | "flag.2.crossed.fill" {
+  return /^finale$/i.test(name.trim()) ? "trophy.fill" : "flag.2.crossed.fill";
+}

@@ -1,6 +1,6 @@
 import { ConvexError, v, type Infer } from "convex/values";
 
-import { optionValidator } from "./pick";
+import { OTHER_OPTION_ID, optionValidator } from "./pick";
 import type { FixtureType } from "../types";
 
 /** Een volgorde van de top N: podium, medaillespiegel, eindstand van een groep. */
@@ -33,14 +33,24 @@ export type RankingResult = Infer<typeof rankingResultValidator>;
 export type RankingPrediction = Infer<typeof rankingPredictionValidator>;
 export type RankingRules = Infer<typeof rankingRulesValidator>;
 
-function assertValidOrder(payload: RankingPayload, order: string[]) {
+function assertValidOrder(
+  payload: RankingPayload,
+  order: string[],
+  { allowOther }: { allowOther: boolean },
+) {
   if (order.length !== payload.size) {
     throw new ConvexError(`Vul precies ${payload.size} plekken in.`);
   }
 
-  const unique = new Set(order);
+  if (!allowOther && order.includes(OTHER_OPTION_ID)) {
+    throw new ConvexError("Kies voor elke plek een renner of team uit de lijst.");
+  }
 
-  if (unique.size !== order.length) {
+  // "Iemand anders" mag in een uitslag vaker voorkomen; de rest maar één keer.
+  const named = order.filter((id) => id !== OTHER_OPTION_ID);
+  const unique = new Set(named);
+
+  if (unique.size !== named.length) {
     throw new ConvexError("Elke deelnemer mag maar één keer voorkomen.");
   }
 
@@ -64,11 +74,11 @@ export const rankingFixtureType: FixtureType<
   defaultRules: { exactPosition: 3, inTopN: 1 },
 
   assertPredictionFits(payload, prediction) {
-    assertValidOrder(payload, prediction.order);
+    assertValidOrder(payload, prediction.order, { allowOther: false });
   },
 
   assertResultFits(payload, result) {
-    assertValidOrder(payload, result.order);
+    assertValidOrder(payload, result.order, { allowOther: true });
   },
 
   score({ prediction, result, rules }) {
@@ -76,6 +86,11 @@ export const rankingFixtureType: FixtureType<
     let points = 0;
 
     prediction.order.forEach((id, index) => {
+      // "Iemand anders" is geen voorspelling van een renner en telt nooit.
+      if (id === OTHER_OPTION_ID) {
+        return;
+      }
+
       if (result.order[index] === id) {
         points += rules.exactPosition;
         breakdown.exactPosition = (breakdown.exactPosition ?? 0) + rules.exactPosition;

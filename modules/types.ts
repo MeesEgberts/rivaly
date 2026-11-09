@@ -43,6 +43,20 @@ export interface ScoringPreset {
   rules: Partial<RulesByType>;
 }
 
+/**
+ * Een reeks losse evenementen die je in één keer aan een poule toevoegt,
+ * bijv. alle monumenten. Een evenement noemt zijn reeksen in `meta.series`.
+ */
+export interface EventSeries {
+  key: string;
+  name: string;
+  /** Eén evenement uit de reeks, bijv. "Monument". */
+  memberName: string;
+  description: string;
+  /** SF Symbol voor de keuzerij. */
+  icon: string;
+}
+
 export interface SportModule {
   key: string;
   name: string;
@@ -52,6 +66,8 @@ export interface SportModule {
   /** Soorten fases die de UI van deze module kan weergeven. */
   stageKinds: string[];
   presets: ScoringPreset[];
+  /** Reeksen waaruit een poule in één tik alle evenementen kiest. */
+  series?: EventSeries[];
 }
 
 // De concrete Rules-typen worden in de fixture-types gedefinieerd en hier

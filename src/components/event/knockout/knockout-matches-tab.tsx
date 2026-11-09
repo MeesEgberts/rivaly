@@ -7,7 +7,11 @@ import { MatchdayDayCard } from "@/components/event/matchdays/matchday-day-card"
 import { ScoreEntryScrollView } from "@/components/score-entry/score-entry-scroll-view";
 import { useEventData } from "@/hooks/use-event-data";
 import { useNow } from "@/hooks/use-now";
-import { toEditableMatches, toMatchRows } from "@/utils/match-rows";
+import {
+  knockoutRoundIcon,
+  toEditableMatches,
+  toMatchRows,
+} from "@/utils/match-rows";
 
 interface Props {
   eventId: Id<"events">;
@@ -56,6 +60,7 @@ export function KnockoutMatchesTab({ eventId }: Props) {
           key={stage.stageId}
           title={stage.name}
           matches={stage.matches}
+          icon={knockoutRoundIcon(stage.name)}
         />
       ))}
     </ScoreEntryScrollView>

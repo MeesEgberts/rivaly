@@ -5,6 +5,8 @@ import { useAppColors } from "@/hooks/use-app-colors";
 
 interface Props {
   title?: string;
+  /** Kop binnen de kaart, bijv. een `CardHeader`. */
+  header?: ReactNode;
   /** Korte toelichting onder de kaart. */
   footer?: string;
   children: ReactNode;
@@ -14,7 +16,7 @@ interface Props {
  * Afgeronde kaart met kop, zoals een inset-grouped sectie op iOS en een
  * kaart in een Material-lijst. Voor eigen views die niet in een `Form` passen.
  */
-export function InsetCard({ title, footer, children }: Props) {
+export function InsetCard({ title, header, footer, children }: Props) {
   const colors = useAppColors();
 
   return (
@@ -35,6 +37,7 @@ export function InsetCard({ title, footer, children }: Props) {
         </Text>
       ) : null}
       <View style={[styles.card, { backgroundColor: colors.card }]}>
+        {header}
         {children}
       </View>
       {footer ? (

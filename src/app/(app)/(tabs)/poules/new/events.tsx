@@ -9,19 +9,22 @@ import { NavRow } from "@/components/ui/nav-row";
 import { Screen, Section } from "@/components/ui/screen";
 import { useNewPouleDraft } from "@/hooks/use-new-poule-draft";
 import {
+  catalogSeries,
   catalogSports,
   catalogSubtitle,
   filterCatalog,
+  seriesSubtitle,
   sportIcon,
 } from "@/utils/event-catalog";
 
 /**
  * Wedstrijden en toernooien kiezen voor een nieuwe poule: zoeken via de
- * zoekbalk in de header, filteren op sport via het menu rechtsboven.
+ * zoekbalk in de header, filteren op sport via het menu rechtsboven. Een
+ * reeks (bijv. alle monumenten) kies je in één tik.
  */
 export default function ChooseEventsScreen() {
   const catalog = useQuery(api.events.catalog);
-  const { selectedEventIds, toggleEvent } = useNewPouleDraft();
+  const { selectedEventIds, toggleEvent, toggleEvents } = useNewPouleDraft();
 
   const [search, setSearch] = useState("");
   const [sportKey, setSportKey] = useState<string | null>(null);
@@ -32,6 +35,17 @@ export default function ChooseEventsScreen() {
     () => filterCatalog(catalog ?? [], search, sportKey),
     [catalog, search, sportKey],
   );
+
+  // Reeksen alleen zonder zoekterm, en binnen het sportfilter.
+  const series = useMemo(() => {
+    if (search.trim().length > 0) {
+      return [];
+    }
+
+    return catalogSeries(catalog ?? []).filter(
+      (item) => sportKey === null || item.moduleKey === sportKey,
+    );
+  }, [catalog, search, sportKey]);
 
   if (catalog === undefined) {
     return <LoadingScreen />;
@@ -88,7 +102,27 @@ export default function ChooseEventsScreen() {
         />
       ) : (
         <Screen>
-          <Section title={activeSport?.name}>
+          {series.length > 0 ? (
+            <Section title="Reeksen">
+              {series.map((item) => (
+                <NavRow
+                  key={item.key}
+                  icon={item.icon}
+                  title={item.name}
+                  subtitle={seriesSubtitle(item)}
+                  selected={item.eventIds.every((eventId) =>
+                    selectedEventIds.has(eventId),
+                  )}
+                  onPress={() => toggleEvents(item.eventIds)}
+                />
+              ))}
+            </Section>
+          ) : null}
+          <Section
+            title={
+              activeSport?.name ?? (series.length > 0 ? "Alles" : undefined)
+            }
+          >
             {results.map((event) => (
               <NavRow
                 key={event._id}

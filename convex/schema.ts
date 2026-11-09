@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 import {
+  fixtureDetailsValidator,
   fixturePayloadValidator,
   fixturePredictionValidator,
   fixtureResultValidator,
@@ -70,6 +71,8 @@ export default defineSchema({
       shortName: v.optional(v.string()),
       imageUrl: v.optional(v.string()),
       color: v.optional(v.string()),
+      /** Reeksen uit de module, bijv. "monuments", om in één keer te kiezen. */
+      series: v.optional(v.array(v.string())),
     }),
   })
     .index("by_slug", ["slug"])
@@ -108,6 +111,7 @@ export default defineSchema({
     ),
     payload: fixturePayloadValidator,
     result: v.optional(fixtureResultValidator),
+    details: v.optional(fixtureDetailsValidator),
   })
     .index("by_event_and_order", ["eventId", "order"])
     .index("by_stage_and_order", ["stageId", "order"])
