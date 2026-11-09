@@ -1,9 +1,10 @@
 import type { SkatingCategory } from "../../modules/skating/categories";
 
 /**
- * Testgegevens voor schaatsen en shorttrack: atleten per categorie en de
- * WK's van 2027. Data, tijden en deelnemers zijn schattingen; pas ze aan
- * zodra het officiële programma er is.
+ * Schaatsen en shorttrack, seizoen 2026/27: atleten per categorie en de
+ * kalender van de ISU (World Cups, World Tour, EK's en WK's). Plaatsen en
+ * data komen van de ISU-kalender; het programma per dag, de starttijden en
+ * de favorieten zijn schattingen tot het officiële tijdschema er is.
  */
 
 export interface SeedSkater {
@@ -136,12 +137,14 @@ export const RELAY_NATIONS: { nation: string; name: string }[] = [
   { nation: "POL", name: "Polen" },
 ];
 
+export type SeedFormat = "massstart" | "relay" | "sprint" | "allround";
+
 export interface SeedDistance {
   /** Lokale starttijd met tijdzone. */
   startsAt: string;
   category: SkatingCategory;
   distanceM?: number;
-  format?: "massstart" | "relay";
+  format?: SeedFormat;
   /** Namen van de favorieten; leeg bij een aflossing (dan alle ploegen). */
   favourites: string[];
 }
@@ -150,331 +153,561 @@ export interface SeedChampionship {
   key: string;
   name: string;
   shortName: string;
+  /** Reeksen uit de module, bijv. "worldCup". */
+  series: string[];
   distances: SeedDistance[];
 }
 
-const at = (date: string, time: string) => `${date}T${time}:00+01:00`;
-
-/** WK Afstanden 2027: vier dagen, twaalf afstanden (schatting). */
-export const WK_AFSTANDEN_2027: SeedChampionship = {
-  key: "wk-afstanden-2027",
-  name: "WK Afstanden 2027",
-  shortName: "WK Afstanden",
-  distances: [
-    {
-      startsAt: at("2027-03-04", "15:00"),
-      category: "women",
-      distanceM: 3000,
-      favourites: [
-        "Joy Beune",
-        "Ragne Wiklund",
-        "Martina Sáblíková",
-        "Isabelle Weidemann",
-        "Francesca Lollobrigida",
-        "Merel Conijn",
-        "Valérie Maltais",
-      ],
-    },
-    {
-      startsAt: at("2027-03-04", "17:00"),
-      category: "men",
-      distanceM: 5000,
-      favourites: [
-        "Davide Ghiotto",
-        "Sander Eitrem",
-        "Patrick Roest",
-        "Beau Snellink",
-        "Metoděj Jílek",
-        "Ted-Jan Bloemen",
-        "Jorrit Bergsma",
-      ],
-    },
-    {
-      startsAt: at("2027-03-05", "15:00"),
-      category: "women",
-      distanceM: 500,
-      favourites: [
-        "Femke Kok",
-        "Erin Jackson",
-        "Jutta Leerdam",
-        "Kim Min-sun",
-        "Miho Takagi",
-        "Kimi Goetz",
-        "Angel Daleman",
-      ],
-    },
-    {
-      startsAt: at("2027-03-05", "17:00"),
-      category: "men",
-      distanceM: 500,
-      favourites: [
-        "Jordan Stolz",
-        "Jenning de Boo",
-        "Laurent Dubreuil",
-        "Damian Żurek",
-        "Yuma Murakami",
-        "Wataru Morishige",
-        "Tatsuya Shinhama",
-      ],
-    },
-    {
-      startsAt: at("2027-03-06", "14:00"),
-      category: "women",
-      distanceM: 1500,
-      favourites: [
-        "Joy Beune",
-        "Miho Takagi",
-        "Antoinette Rijpma-de Jong",
-        "Brittany Bowe",
-        "Marijke Groenewoud",
-        "Han Mei",
-        "Ragne Wiklund",
-      ],
-    },
-    {
-      startsAt: at("2027-03-06", "15:30"),
-      category: "men",
-      distanceM: 1500,
-      favourites: [
-        "Jordan Stolz",
-        "Kjeld Nuis",
-        "Peder Kongshaug",
-        "Connor Howe",
-        "Ning Zhongyan",
-        "Tim Prins",
-        "Vladimir Semirunniy",
-      ],
-    },
-    {
-      startsAt: at("2027-03-06", "17:00"),
-      category: "women",
-      format: "massstart",
-      favourites: [
-        "Marijke Groenewoud",
-        "Ivanie Blondin",
-        "Valérie Maltais",
-        "Karolina Bosiek",
-        "Francesca Lollobrigida",
-        "Elizaveta Golubeva",
-        "Jade Groenewoud",
-      ],
-    },
-    {
-      startsAt: at("2027-03-06", "17:30"),
-      category: "men",
-      format: "massstart",
-      favourites: [
-        "Bart Swings",
-        "Jorrit Bergsma",
-        "Andrea Giovannini",
-        "Chris Huizinga",
-        "Stijn van de Bunt",
-        "Cooper McLeod",
-        "Casey Dawson",
-      ],
-    },
-    {
-      startsAt: at("2027-03-07", "13:00"),
-      category: "women",
-      distanceM: 1000,
-      favourites: [
-        "Jutta Leerdam",
-        "Femke Kok",
-        "Miho Takagi",
-        "Kimi Goetz",
-        "Brittany Bowe",
-        "Antoinette Rijpma-de Jong",
-        "Suzanne Schulting",
-      ],
-    },
-    {
-      startsAt: at("2027-03-07", "14:00"),
-      category: "men",
-      distanceM: 1000,
-      favourites: [
-        "Jordan Stolz",
-        "Jenning de Boo",
-        "Joep Wennemars",
-        "Ning Zhongyan",
-        "Kjeld Nuis",
-        "Laurent Dubreuil",
-        "Cooper McLeod",
-      ],
-    },
-    {
-      startsAt: at("2027-03-07", "15:00"),
-      category: "women",
-      distanceM: 5000,
-      favourites: [
-        "Joy Beune",
-        "Ragne Wiklund",
-        "Martina Sáblíková",
-        "Merel Conijn",
-        "Isabelle Weidemann",
-        "Valérie Maltais",
-        "Francesca Lollobrigida",
-      ],
-    },
-    {
-      startsAt: at("2027-03-07", "16:30"),
-      category: "men",
-      distanceM: 10000,
-      favourites: [
-        "Davide Ghiotto",
-        "Sander Eitrem",
-        "Patrick Roest",
-        "Metoděj Jílek",
-        "Beau Snellink",
-        "Ted-Jan Bloemen",
-        "Jorrit Bergsma",
-      ],
-    },
+/** Favorieten per categorie en afstand ("women:500", "men:massstart"). */
+const SPEED_FAVOURITES: Record<string, string[]> = {
+  "women:500": [
+    "Femke Kok",
+    "Erin Jackson",
+    "Jutta Leerdam",
+    "Kim Min-sun",
+    "Miho Takagi",
+    "Kimi Goetz",
+    "Angel Daleman",
+  ],
+  "men:500": [
+    "Jordan Stolz",
+    "Jenning de Boo",
+    "Laurent Dubreuil",
+    "Damian Żurek",
+    "Yuma Murakami",
+    "Wataru Morishige",
+    "Tatsuya Shinhama",
+  ],
+  "women:1000": [
+    "Jutta Leerdam",
+    "Femke Kok",
+    "Miho Takagi",
+    "Kimi Goetz",
+    "Brittany Bowe",
+    "Antoinette Rijpma-de Jong",
+    "Suzanne Schulting",
+  ],
+  "men:1000": [
+    "Jordan Stolz",
+    "Jenning de Boo",
+    "Joep Wennemars",
+    "Ning Zhongyan",
+    "Kjeld Nuis",
+    "Laurent Dubreuil",
+    "Cooper McLeod",
+  ],
+  "women:1500": [
+    "Joy Beune",
+    "Miho Takagi",
+    "Antoinette Rijpma-de Jong",
+    "Brittany Bowe",
+    "Marijke Groenewoud",
+    "Han Mei",
+    "Ragne Wiklund",
+  ],
+  "men:1500": [
+    "Jordan Stolz",
+    "Kjeld Nuis",
+    "Peder Kongshaug",
+    "Connor Howe",
+    "Ning Zhongyan",
+    "Tim Prins",
+    "Vladimir Semirunniy",
+  ],
+  "women:3000": [
+    "Joy Beune",
+    "Ragne Wiklund",
+    "Martina Sáblíková",
+    "Isabelle Weidemann",
+    "Francesca Lollobrigida",
+    "Merel Conijn",
+    "Valérie Maltais",
+  ],
+  "women:5000": [
+    "Joy Beune",
+    "Ragne Wiklund",
+    "Martina Sáblíková",
+    "Merel Conijn",
+    "Isabelle Weidemann",
+    "Valérie Maltais",
+    "Francesca Lollobrigida",
+  ],
+  "men:5000": [
+    "Davide Ghiotto",
+    "Sander Eitrem",
+    "Patrick Roest",
+    "Beau Snellink",
+    "Metoděj Jílek",
+    "Ted-Jan Bloemen",
+    "Jorrit Bergsma",
+  ],
+  "men:10000": [
+    "Davide Ghiotto",
+    "Sander Eitrem",
+    "Patrick Roest",
+    "Metoděj Jílek",
+    "Beau Snellink",
+    "Ted-Jan Bloemen",
+    "Jorrit Bergsma",
+  ],
+  "women:massstart": [
+    "Marijke Groenewoud",
+    "Ivanie Blondin",
+    "Valérie Maltais",
+    "Karolina Bosiek",
+    "Francesca Lollobrigida",
+    "Elizaveta Golubeva",
+    "Jade Groenewoud",
+  ],
+  "men:massstart": [
+    "Bart Swings",
+    "Jorrit Bergsma",
+    "Andrea Giovannini",
+    "Chris Huizinga",
+    "Stijn van de Bunt",
+    "Cooper McLeod",
+    "Casey Dawson",
+  ],
+  "women:sprint": [
+    "Femke Kok",
+    "Jutta Leerdam",
+    "Angel Daleman",
+    "Suzanne Schulting",
+    "Vanessa Herzog",
+    "Karolina Bosiek",
+  ],
+  "men:sprint": [
+    "Jenning de Boo",
+    "Joep Wennemars",
+    "Kjeld Nuis",
+    "Damian Żurek",
+    "Tim Prins",
+    "Marcel Bosker",
+  ],
+  "women:allround": [
+    "Joy Beune",
+    "Marijke Groenewoud",
+    "Antoinette Rijpma-de Jong",
+    "Ragne Wiklund",
+    "Merel Conijn",
+    "Martina Sáblíková",
+    "Francesca Lollobrigida",
+    "Karolina Bosiek",
+  ],
+  "men:allround": [
+    "Patrick Roest",
+    "Sander Eitrem",
+    "Davide Ghiotto",
+    "Beau Snellink",
+    "Peder Kongshaug",
+    "Metoděj Jílek",
+    "Marcel Bosker",
   ],
 };
 
-/** WK Shorttrack 2027: finales op zaterdag en zondag (schatting). */
-export const WK_SHORTTRACK_2027: SeedChampionship = {
-  key: "wk-shorttrack-2027",
-  name: "WK Shorttrack 2027",
-  shortName: "WK Shorttrack",
-  distances: [
-    {
-      startsAt: at("2027-03-13", "14:00"),
-      category: "women",
-      distanceM: 1500,
-      favourites: [
-        "Xandra Velzeboer",
-        "Courtney Sarault",
-        "Kim Gil-li",
-        "Choi Min-jeong",
-        "Kristen Santos-Griswold",
-        "Suzanne Schulting",
-        "Corinne Stoddard",
-      ],
-    },
-    {
-      startsAt: at("2027-03-13", "14:15"),
-      category: "men",
-      distanceM: 1500,
-      favourites: [
-        "Jens van 't Wout",
-        "William Dandjinou",
-        "Park Ji-won",
-        "Lin Xiaojun",
-        "Liu Shaoang",
-        "Jang Sung-woo",
-        "Roberts Krūzbergs",
-      ],
-    },
-    {
-      startsAt: at("2027-03-13", "15:00"),
-      category: "women",
-      distanceM: 500,
-      favourites: [
-        "Xandra Velzeboer",
-        "Arianna Fontana",
-        "Kim Boutin",
-        "Selma Poutsma",
-        "Fan Kexin",
-        "Danaé Blais",
-        "Michelle Velzeboer",
-      ],
-    },
-    {
-      startsAt: at("2027-03-13", "15:15"),
-      category: "men",
-      distanceM: 500,
-      favourites: [
-        "Steven Dubois",
-        "Pietro Sighel",
-        "Jens van 't Wout",
-        "Liu Shaoang",
-        "Sun Long",
-        "Melle van 't Wout",
-        "William Dandjinou",
-      ],
-    },
-    {
-      startsAt: at("2027-03-13", "16:00"),
-      category: "relayMixed",
-      distanceM: 2000,
-      format: "relay",
-      favourites: [],
-    },
-    {
-      startsAt: at("2027-03-14", "14:00"),
-      category: "women",
-      distanceM: 1000,
-      favourites: [
-        "Xandra Velzeboer",
-        "Courtney Sarault",
-        "Kim Gil-li",
-        "Suzanne Schulting",
-        "Kristen Santos-Griswold",
-        "Hanne Desmet",
-        "Choi Min-jeong",
-      ],
-    },
-    {
-      startsAt: at("2027-03-14", "14:15"),
-      category: "men",
-      distanceM: 1000,
-      favourites: [
-        "William Dandjinou",
-        "Jens van 't Wout",
-        "Park Ji-won",
-        "Pietro Sighel",
-        "Lin Xiaojun",
-        "Stijn Desmet",
-        "Steven Dubois",
-      ],
-    },
-    {
-      startsAt: at("2027-03-14", "15:00"),
-      category: "relayWomen",
-      distanceM: 3000,
-      format: "relay",
-      favourites: [],
-    },
-    {
-      startsAt: at("2027-03-14", "15:30"),
-      category: "relayMen",
-      distanceM: 5000,
-      format: "relay",
-      favourites: [],
-    },
+const SHORT_FAVOURITES: Record<string, string[]> = {
+  "women:500": [
+    "Xandra Velzeboer",
+    "Arianna Fontana",
+    "Kim Boutin",
+    "Selma Poutsma",
+    "Fan Kexin",
+    "Danaé Blais",
+    "Michelle Velzeboer",
+  ],
+  "men:500": [
+    "Steven Dubois",
+    "Pietro Sighel",
+    "Jens van 't Wout",
+    "Liu Shaoang",
+    "Sun Long",
+    "Melle van 't Wout",
+    "William Dandjinou",
+  ],
+  "women:1000": [
+    "Xandra Velzeboer",
+    "Courtney Sarault",
+    "Kim Gil-li",
+    "Suzanne Schulting",
+    "Kristen Santos-Griswold",
+    "Hanne Desmet",
+    "Choi Min-jeong",
+  ],
+  "men:1000": [
+    "William Dandjinou",
+    "Jens van 't Wout",
+    "Park Ji-won",
+    "Pietro Sighel",
+    "Lin Xiaojun",
+    "Stijn Desmet",
+    "Steven Dubois",
+  ],
+  "women:1500": [
+    "Xandra Velzeboer",
+    "Courtney Sarault",
+    "Kim Gil-li",
+    "Choi Min-jeong",
+    "Kristen Santos-Griswold",
+    "Suzanne Schulting",
+    "Corinne Stoddard",
+  ],
+  "men:1500": [
+    "Jens van 't Wout",
+    "William Dandjinou",
+    "Park Ji-won",
+    "Lin Xiaojun",
+    "Liu Shaoang",
+    "Jang Sung-woo",
+    "Roberts Krūzbergs",
   ],
 };
+
+/** Landen in Europa, voor de favorieten van een EK. */
+const EUROPE = new Set([
+  "NED",
+  "BEL",
+  "NOR",
+  "ITA",
+  "POL",
+  "CZE",
+  "AUT",
+  "GER",
+  "FRA",
+  "HUN",
+  "LAT",
+  "SUI",
+  "GBR",
+]);
+
+type Favourites = Record<string, string[]>;
+type Skaters = SeedSkater[];
+
+/** Eén afstand van een programma: "500", "massstart", "relay:2000", ... */
+interface Slot {
+  date: string;
+  time: string;
+  category: SkatingCategory;
+  key: string;
+}
+
+function distanceFrom(
+  slot: Slot,
+  offset: string,
+  favourites: Favourites,
+  europeOnly: Skaters | null,
+): SeedDistance {
+  const startsAt = `${slot.date}T${slot.time}:00${offset}`;
+  const [kind, meters] = slot.key.split(":");
+
+  if (kind === "relay") {
+    return {
+      startsAt,
+      category: slot.category,
+      distanceM: Number(meters),
+      format: "relay",
+      favourites: [],
+    };
+  }
+
+  const isFormat =
+    kind === "massstart" || kind === "sprint" || kind === "allround";
+  let names = favourites[`${slot.category}:${kind}`] ?? [];
+
+  if (europeOnly) {
+    const nationOf = new Map(
+      europeOnly.map((skater) => [skater.name, skater.nation]),
+    );
+    names = names.filter((name) => EUROPE.has(nationOf.get(name) ?? ""));
+  }
+
+  return {
+    startsAt,
+    category: slot.category,
+    distanceM: isFormat ? undefined : Number(kind),
+    format: isFormat ? (kind as SeedFormat) : undefined,
+    favourites: names,
+  };
+}
+
+const days = (dates: string[]) => ({
+  /** Programma per dag: [dag, tijd, categorie, afstand]. */
+  program: (rows: [number, string, SkatingCategory, string][]): Slot[] =>
+    rows.map(([day, time, category, key]) => ({
+      date: dates[day],
+      time,
+      category,
+      key,
+    })),
+});
+
+/** World Cup: drie dagen, tien afstanden (programma geschat). */
+function worldCup(dates: string[]): Slot[] {
+  return days(dates).program([
+    [0, "15:00", "women", "500"],
+    [0, "15:30", "men", "500"],
+    [0, "16:30", "women", "3000"],
+    [0, "17:30", "men", "5000"],
+    [1, "14:00", "women", "1000"],
+    [1, "14:45", "men", "1000"],
+    [1, "16:00", "women", "massstart"],
+    [1, "16:30", "men", "massstart"],
+    [2, "14:00", "women", "1500"],
+    [2, "15:00", "men", "1500"],
+  ]);
+}
+
+/** Shorttrack: finales op zaterdag en zondag (programma geschat). */
+function shorttrackWeekend(dates: string[]): Slot[] {
+  return days(dates).program([
+    [1, "13:00", "women", "1500"],
+    [1, "13:15", "men", "1500"],
+    [1, "14:00", "women", "500"],
+    [1, "14:15", "men", "500"],
+    [1, "15:00", "relayMixed", "relay:2000"],
+    [2, "13:00", "women", "1000"],
+    [2, "13:15", "men", "1000"],
+    [2, "14:00", "relayWomen", "relay:3000"],
+    [2, "14:30", "relayMen", "relay:5000"],
+  ]);
+}
+
+interface Edition {
+  key: string;
+  name: string;
+  shortName: string;
+  series: string[];
+  dates: string[];
+  /** UTC-offset van de plaats in de winter, bijv. "+01:00". */
+  offset: string;
+  slots: (dates: string[]) => Slot[];
+  europeOnly?: boolean;
+}
+
+function build(
+  edition: Edition,
+  favourites: Favourites,
+  skaters: Skaters,
+): SeedChampionship {
+  return {
+    key: edition.key,
+    name: edition.name,
+    shortName: edition.shortName,
+    series: edition.series,
+    distances: edition
+      .slots(edition.dates)
+      .map((slot) =>
+        distanceFrom(
+          slot,
+          edition.offset,
+          favourites,
+          edition.europeOnly ? skaters : null,
+        ),
+      ),
+  };
+}
+
+const WC = ["worldCup"];
+const CHAMPS = ["championships"];
+
+/** WK Afstanden in Beijing: vier dagen, twaalf afstanden. */
+function worldSingleDistances(dates: string[]): Slot[] {
+  return days(dates).program([
+    [0, "15:00", "women", "3000"],
+    [0, "17:00", "men", "5000"],
+    [1, "15:00", "women", "500"],
+    [1, "17:00", "men", "500"],
+    [2, "14:00", "women", "1500"],
+    [2, "15:30", "men", "1500"],
+    [2, "17:00", "women", "massstart"],
+    [2, "17:30", "men", "massstart"],
+    [3, "13:00", "women", "1000"],
+    [3, "14:00", "men", "1000"],
+    [3, "15:00", "women", "5000"],
+    [3, "16:30", "men", "10000"],
+  ]);
+}
+
+/** EK Allround en Sprint: sprintklassement op vrijdag, allround in het weekend. */
+function europeanAllroundSprint(dates: string[]): Slot[] {
+  return days(dates).program([
+    [0, "17:00", "women", "sprint"],
+    [0, "18:00", "men", "sprint"],
+    [1, "13:00", "women", "allround"],
+    [1, "14:00", "men", "allround"],
+  ]);
+}
+
+const SPEED_EDITIONS: Edition[] = [
+  {
+    key: "wc-beijing-2026",
+    name: "World Cup Beijing 2026",
+    shortName: "WC Beijing",
+    series: WC,
+    dates: ["2026-11-13", "2026-11-14", "2026-11-15"],
+    offset: "+08:00",
+    slots: worldCup,
+  },
+  {
+    key: "wc-obihiro-2026",
+    name: "World Cup Obihiro 2026",
+    shortName: "WC Obihiro",
+    series: WC,
+    dates: ["2026-11-20", "2026-11-21", "2026-11-22"],
+    offset: "+09:00",
+    slots: worldCup,
+  },
+  {
+    key: "wc-heerenveen-2026",
+    name: "World Cup Heerenveen 2026",
+    shortName: "WC Heerenveen",
+    series: WC,
+    dates: ["2026-12-04", "2026-12-05", "2026-12-06"],
+    offset: "+01:00",
+    slots: worldCup,
+  },
+  {
+    key: "wc-stavanger-2026",
+    name: "World Cup Stavanger 2026",
+    shortName: "WC Stavanger",
+    series: WC,
+    dates: ["2026-12-11", "2026-12-12", "2026-12-13"],
+    offset: "+01:00",
+    slots: worldCup,
+  },
+  {
+    key: "ek-allround-sprint-2027",
+    name: "EK Allround en Sprint 2027",
+    shortName: "EK Allround en Sprint",
+    series: CHAMPS,
+    dates: ["2027-01-08", "2027-01-09", "2027-01-10"],
+    offset: "+01:00",
+    slots: europeanAllroundSprint,
+    europeOnly: true,
+  },
+  {
+    key: "wc-salt-lake-city-2027",
+    name: "World Cup Salt Lake City 2027",
+    shortName: "WC Salt Lake City",
+    series: WC,
+    dates: ["2027-01-29", "2027-01-30", "2027-01-31"],
+    offset: "-07:00",
+    slots: worldCup,
+  },
+  {
+    key: "wc-calgary-2027",
+    name: "World Cup Calgary 2027",
+    shortName: "WC Calgary",
+    series: WC,
+    dates: ["2027-02-05", "2027-02-06", "2027-02-07"],
+    offset: "-07:00",
+    slots: worldCup,
+  },
+  {
+    key: "wk-afstanden-2027",
+    name: "WK Afstanden 2027",
+    shortName: "WK Afstanden",
+    series: CHAMPS,
+    dates: ["2027-02-25", "2027-02-26", "2027-02-27", "2027-02-28"],
+    offset: "+08:00",
+    slots: worldSingleDistances,
+  },
+];
+
+const WT = ["worldTour"];
+
+const SHORT_EDITIONS: Edition[] = [
+  {
+    key: "wt-seoul-2026",
+    name: "World Tour Seoul 2026",
+    shortName: "WT Seoul",
+    series: WT,
+    dates: ["2026-11-20", "2026-11-21", "2026-11-22"],
+    offset: "+09:00",
+    slots: shorttrackWeekend,
+  },
+  {
+    key: "wt-shanghai-2026",
+    name: "World Tour Shanghai 2026",
+    shortName: "WT Shanghai",
+    series: WT,
+    dates: ["2026-11-27", "2026-11-28", "2026-11-29"],
+    offset: "+08:00",
+    slots: shorttrackWeekend,
+  },
+  {
+    key: "wt-beijing-2026",
+    name: "World Tour Beijing 2026",
+    shortName: "WT Beijing",
+    series: WT,
+    dates: ["2026-12-04", "2026-12-05", "2026-12-06"],
+    offset: "+08:00",
+    slots: shorttrackWeekend,
+  },
+  {
+    key: "ek-shorttrack-2027",
+    name: "EK Shorttrack 2027",
+    shortName: "EK Shorttrack",
+    series: CHAMPS,
+    dates: ["2027-01-15", "2027-01-16", "2027-01-17"],
+    offset: "+01:00",
+    slots: shorttrackWeekend,
+    europeOnly: true,
+  },
+  {
+    key: "wt-gdansk-2027",
+    name: "World Tour Gdańsk 2027",
+    shortName: "WT Gdańsk",
+    series: WT,
+    dates: ["2027-02-05", "2027-02-06", "2027-02-07"],
+    offset: "+01:00",
+    slots: shorttrackWeekend,
+  },
+  {
+    key: "wt-tilburg-2027",
+    name: "World Tour Tilburg 2027",
+    shortName: "WT Tilburg",
+    series: WT,
+    dates: ["2027-02-12", "2027-02-13", "2027-02-14"],
+    offset: "+01:00",
+    slots: shorttrackWeekend,
+  },
+  {
+    key: "wk-shorttrack-2027",
+    name: "WK Shorttrack 2027",
+    shortName: "WK Shorttrack",
+    series: CHAMPS,
+    dates: ["2027-03-12", "2027-03-13", "2027-03-14"],
+    offset: "+09:00",
+    slots: shorttrackWeekend,
+  },
+];
+
+/** Langebaanschaatsen 2026/27: zes World Cups, het EK en het WK Afstanden. */
+export const SPEEDSKATING_2026_27: SeedChampionship[] = SPEED_EDITIONS.map(
+  (edition) => build(edition, SPEED_FAVOURITES, SPEEDSKATERS),
+);
+
+/** Shorttrack 2026/27: vijf World Tour-wedstrijden, het EK en het WK. */
+export const SHORTTRACK_2026_27: SeedChampionship[] = SHORT_EDITIONS.map(
+  (edition) => build(edition, SHORT_FAVOURITES, SHORTTRACKERS),
+);
 
 /** Kleine test met vier afstanden, om locken en uitslagen te proberen. */
-export const TEST_SPEEDSKATING: SeedChampionship = {
-  key: "test-schaatsen",
-  name: "Rivaly Schaatstest",
-  shortName: "Schaatstest",
-  distances: [
-    {
-      startsAt: "",
-      category: "women",
-      distanceM: 500,
-      favourites: WK_AFSTANDEN_2027.distances[2].favourites,
-    },
-    {
-      startsAt: "",
-      category: "men",
-      distanceM: 500,
-      favourites: WK_AFSTANDEN_2027.distances[3].favourites,
-    },
-    {
-      startsAt: "",
-      category: "women",
-      distanceM: 1000,
-      favourites: WK_AFSTANDEN_2027.distances[8].favourites,
-    },
-    {
-      startsAt: "",
-      category: "men",
-      format: "massstart",
-      favourites: WK_AFSTANDEN_2027.distances[7].favourites,
-    },
-  ],
-};
+export const TEST_SPEEDSKATING: SeedChampionship = build(
+  {
+    key: "test-schaatsen",
+    name: "Rivaly Schaatstest",
+    shortName: "Schaatstest",
+    series: [],
+    dates: ["", "", ""],
+    offset: "",
+    slots: () => [
+      { date: "", time: "", category: "women", key: "500" },
+      { date: "", time: "", category: "men", key: "500" },
+      { date: "", time: "", category: "women", key: "1000" },
+      { date: "", time: "", category: "men", key: "massstart" },
+    ],
+  },
+  SPEED_FAVOURITES,
+  SPEEDSKATERS,
+);

@@ -1,10 +1,9 @@
 import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
-import { SymbolBadge } from "@/components/cards/symbol-badge";
+import { SportBadge } from "@/components/ui/sport-badge";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { fadeInOnce } from "@/utils/image-fade";
-import { moduleIcon } from "@/utils/sport-icon";
 
 interface Props {
   logoUrl: string | null;
@@ -34,7 +33,7 @@ export function EventMark({ logoUrl, imageUrl, moduleKey, size = 44 }: Props) {
   }
 
   if (!logoUrl) {
-    return <SymbolBadge name={moduleIcon(moduleKey)} size={size} />;
+    return <SportBadge moduleKey={moduleKey} size={size} />;
   }
 
   // Logo's zijn vaak transparant en niet vierkant: heel laten op een witte

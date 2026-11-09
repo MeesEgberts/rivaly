@@ -21,19 +21,30 @@ export function DistanceCard({ distance, now }: Props) {
       <View style={styles.row}>
         <View style={[styles.badge, { backgroundColor: colors.accentSoft }]}>
           <SymbolView
-            name="figure.ice.skating"
-            size={24}
+            name={distance.formatIcon}
+            size={22}
             tintColor={colors.accent as string}
           />
         </View>
         <View style={styles.text}>
           <Text style={[styles.caption, { color: colors.secondaryLabel }]}>
-            {distance.categoryLabel.toUpperCase()} ·{" "}
-            {formatMoment(fixture.startsAt)}
+            {formatMoment(fixture.startsAt).toUpperCase()}
           </Text>
           <Text style={[styles.title, { color: colors.label }]}>
             {distance.title}
           </Text>
+          <View style={styles.category}>
+            <SymbolView
+              name={distance.figure}
+              size={14}
+              tintColor={colors.secondaryLabel as string}
+            />
+            <Text
+              style={[styles.categoryText, { color: colors.secondaryLabel }]}
+            >
+              {distance.categoryLabel}
+            </Text>
+          </View>
         </View>
       </View>
       <StatusPill
@@ -58,4 +69,6 @@ const styles = StyleSheet.create({
   text: { flex: 1, gap: 2 },
   caption: { fontSize: 12, fontWeight: "600", letterSpacing: 0.4 },
   title: { fontSize: 26, fontWeight: "700" },
+  category: { flexDirection: "row", alignItems: "center", gap: 5 },
+  categoryText: { fontSize: 15, fontWeight: "500" },
 });

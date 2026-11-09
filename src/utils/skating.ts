@@ -1,5 +1,9 @@
+import type { SFSymbol } from "sf-symbols-typescript";
+
 import {
   formatDistance,
+  SKATING_FORMAT_ICONS,
+  skatingFormat,
   isSkatingCategory,
   SKATING_CATEGORIES,
 } from "@modules/skating/categories";
@@ -15,8 +19,10 @@ export interface SkatingDistance {
   title: string;
   /** "Vrouwen", "Mannen" of "Aflossing gemengd". */
   categoryLabel: string;
-  /** "♀", "♂" of "⚥", voor in de strip. */
-  symbol: string;
+  /** SF Symbol van de categorie: man, vrouw of beide. */
+  figure: SFSymbol;
+  /** SF Symbol van de soort race: stopwatch, finishvlag of aflossing. */
+  formatIcon: SFSymbol;
   /** Kort voor in de strip: "500", "MS" of "Afl.". */
   short: string;
 }
@@ -37,6 +43,14 @@ export function distanceTitle(fixture: EventFixture): string {
     return "Massastart";
   }
 
+  if (format === "sprint") {
+    return "Sprintklassement";
+  }
+
+  if (format === "allround") {
+    return "Allroundklassement";
+  }
+
   if (format === "relay") {
     return meters ? `Aflossing ${formatDistance(meters)}` : "Aflossing";
   }
@@ -55,6 +69,14 @@ function distanceShort(fixture: EventFixture): string {
     return "Afl.";
   }
 
+  if (format === "sprint") {
+    return "Spr.";
+  }
+
+  if (format === "allround") {
+    return "All.";
+  }
+
   return String(fixture.details?.distanceM ?? "?");
 }
 
@@ -71,7 +93,10 @@ export function toSkatingDistances(
       status: fixtureCardStatus(fixture, now),
       title: distanceTitle(fixture),
       categoryLabel: category?.label ?? "",
-      symbol: category?.symbol ?? "",
+      figure: (category?.figure ?? "figure.stand") as SFSymbol,
+      formatIcon: SKATING_FORMAT_ICONS[
+        skatingFormat(fixture.details?.format)
+      ] as SFSymbol,
       short: distanceShort(fixture),
     };
   });

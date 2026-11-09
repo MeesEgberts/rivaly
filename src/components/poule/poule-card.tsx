@@ -1,11 +1,10 @@
 import { router } from "expo-router";
-import { SymbolView } from "expo-symbols";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/cards/card";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { pouleSummary, pouleTitle, type MyPoule } from "@/utils/poules";
-import { moduleIcon } from "@/utils/sport-icon";
+import { SportIcon } from "@/components/ui/sport-icon";
 
 import { PouleEmoji } from "./poule-emoji";
 import { RankBadge } from "./rank-badge";
@@ -43,11 +42,11 @@ export function PouleCard({ poule }: Props) {
           </Text>
           <View style={styles.sports}>
             {poule.moduleKeys.map((moduleKey) => (
-              <SymbolView
+              <SportIcon
                 key={moduleKey}
-                name={moduleIcon(moduleKey)}
+                moduleKey={moduleKey}
                 size={15}
-                tintColor={colors.secondaryLabel as string}
+                color={colors.secondaryLabel as string}
               />
             ))}
           </View>

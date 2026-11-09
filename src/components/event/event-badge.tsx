@@ -1,11 +1,10 @@
 import { Image } from "expo-image";
-import { SymbolView } from "expo-symbols";
 import { StyleSheet, View } from "react-native";
 
 import { useAppColors } from "@/hooks/use-app-colors";
 import { fadeInOnce } from "@/utils/image-fade";
 import { eventColor } from "@/utils/event-text";
-import { moduleIcon } from "@/utils/sport-icon";
+import { SportIcon } from "@/components/ui/sport-icon";
 
 interface Props {
   logoUrl: string | null;
@@ -62,11 +61,7 @@ export function EventBadge({ logoUrl, moduleKey, color, size = 84 }: Props) {
         },
       ]}
     >
-      <SymbolView
-        name={moduleIcon(moduleKey)}
-        size={size * 0.46}
-        tintColor="#FFFFFF"
-      />
+      <SportIcon moduleKey={moduleKey} size={size * 0.46} color="#FFFFFF" />
     </View>
   );
 }

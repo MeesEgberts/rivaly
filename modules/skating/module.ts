@@ -1,4 +1,4 @@
-import type { ScoringPreset, SportModule } from "../types";
+import type { EventSeries, ScoringPreset, SportModule } from "../types";
 
 /** Fases van een schaatstoernooi; "bonus" deelt de Extra-tab met voetbal. */
 export const skatingStageKinds = {
@@ -36,6 +36,14 @@ export const skatingPresets: ScoringPreset[] = [
 
 const stageKinds = Object.values(skatingStageKinds);
 
+const championships: EventSeries = {
+  key: "championships",
+  memberName: "Kampioenschap",
+  name: "EK en WK",
+  description: "De Europese en wereldkampioenschappen",
+  icon: "medal.fill",
+};
+
 /** Langebaanschaatsen: afstanden van 500 m tot 10.000 m en de massastart. */
 export const speedskatingModule: SportModule = {
   key: "speedskating",
@@ -44,6 +52,16 @@ export const speedskatingModule: SportModule = {
   fixtureTypes: ["ranking", "pick", "numeric"],
   stageKinds,
   presets: skatingPresets,
+  series: [
+    {
+      key: "worldCup",
+      memberName: "World Cup",
+      name: "World Cup",
+      description: "Alle World Cup-wedstrijden van het seizoen",
+      icon: "globe.europe.africa.fill",
+    },
+    championships,
+  ],
   athleteNoun: { singular: "schaatser", plural: "schaatsers" },
 };
 
@@ -55,5 +73,15 @@ export const shorttrackModule: SportModule = {
   fixtureTypes: ["ranking", "pick", "numeric"],
   stageKinds,
   presets: skatingPresets,
+  series: [
+    {
+      key: "worldTour",
+      memberName: "World Tour",
+      name: "World Tour",
+      description: "Alle World Tour-wedstrijden van het seizoen",
+      icon: "globe.europe.africa.fill",
+    },
+    championships,
+  ],
   athleteNoun: { singular: "shorttracker", plural: "shorttrackers" },
 };

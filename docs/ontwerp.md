@@ -233,9 +233,18 @@ passen). Een toernooi heeft de fases *Afstanden* (per afstand een podium,
   afstand een swipebare pagina met kop ("500 m · Vrouwen") en hetzelfde
   podium als bij wielrennen.
 
-Seed: `npx convex run seedSkating:championships2027` (WK Afstanden en WK
-Shorttrack 2027, data en deelnemers geschat) en
+Seed: `npx convex run seedSkating:season2026_27` (het seizoen 2026/27
+volgens de ISU-kalender: zes World Cups, het EK Allround en Sprint en het WK
+Afstanden in Beijing; vijf World Tour-wedstrijden, het EK en het WK
+Shorttrack in Seoul. Programma per dag, tijden en favorieten zijn geschat;
+reeksen "World Cup", "World Tour" en "EK en WK") en
 `npx convex run seedSkating:testSpeedskating`.
+
+Iconen: iOS heeft geen SF Symbol voor langebaan- of shorttrackschaatsen.
+Daarom staan er eigen tekeningen in `assets/sports/` (`SportIcon` /
+`SportBadge`). Per race: stopwatch (afstand), finishvlag (massastart), drie
+schaatsers (aflossing), bliksem (sprint), lijst (allround); mannen en vrouwen
+als SF-figuurtje.
 
 ### Invullen per soort evenement
 

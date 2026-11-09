@@ -1,3 +1,4 @@
+import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -11,7 +12,7 @@ interface Props {
   onPress: () => void;
 }
 
-/** Eén afstand in de strip: meters, mannen/vrouwen en een stip of vinkje. */
+/** Eén afstand in de strip: meters, een figuurtje voor mannen/vrouwen en een stip of vinkje. */
 export function DistanceChip({ distance, isSelected, onPress }: Props) {
   const colors = useAppColors();
   const foreground = isSelected ? colors.onAccent : colors.label;
@@ -32,7 +33,11 @@ export function DistanceChip({ distance, isSelected, onPress }: Props) {
       <Text style={[styles.short, { color: foreground }]}>
         {distance.short}
       </Text>
-      <Text style={[styles.symbol, { color: muted }]}>{distance.symbol}</Text>
+      <SymbolView
+        name={distance.figure}
+        size={17}
+        tintColor={muted as string}
+      />
       <View style={styles.marker}>
         {status === "todo" ? (
           <View
@@ -67,7 +72,6 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   short: { fontSize: 16, fontWeight: "700", fontVariant: ["tabular-nums"] },
-  symbol: { fontSize: 12, fontWeight: "600" },
   marker: { height: 10, alignItems: "center", justifyContent: "center" },
   dot: { width: 5, height: 5, borderRadius: 3 },
   check: { fontSize: 9, fontWeight: "800", lineHeight: 10 },

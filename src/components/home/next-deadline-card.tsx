@@ -1,5 +1,4 @@
 import { router } from "expo-router";
-import { SymbolView } from "expo-symbols";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/cards/card";
@@ -7,7 +6,7 @@ import { StatusPill } from "@/components/cards/status-pill";
 import { QuestionVisual } from "@/components/cards/question-visual";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { openItemHref, type OpenItem } from "@/utils/home";
-import { moduleIcon } from "@/utils/sport-icon";
+import { SportIcon } from "@/components/ui/sport-icon";
 
 interface Props {
   item: OpenItem;
@@ -29,10 +28,10 @@ export function NextDeadlineCard({ item, now }: Props) {
               EERSTVOLGENDE DEADLINE
             </Text>
             <View style={styles.eventRow}>
-              <SymbolView
-                name={moduleIcon(item.moduleKey)}
+              <SportIcon
+                moduleKey={item.moduleKey}
                 size={13}
-                tintColor={colors.secondaryLabel as string}
+                color={colors.secondaryLabel as string}
               />
               <Text
                 numberOfLines={1}
