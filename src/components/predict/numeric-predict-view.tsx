@@ -11,6 +11,7 @@ import { isFixtureOpen } from "@/utils/match-rows";
 import { clampNumeric, parseNumeric } from "@/utils/numeric";
 import { PredictHeaderCard } from "./predict-header-card";
 import { PredictLockedCard } from "./predict-locked-card";
+import { PoulePredictionsCard } from "./poule-predictions-card";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import { useSavePrediction } from "@/hooks/use-save-prediction";
 
@@ -110,6 +111,7 @@ export function NumericPredictView({ fixture }: Props) {
         ) : (
           <PredictLockedCard fixture={fixture} />
         )}
+        <PoulePredictionsCard fixture={fixture} />
       </ScrollView>
     </>
   );

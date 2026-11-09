@@ -26,7 +26,23 @@ export default function PoulesLayout() {
         name="join"
         options={{ title: "Meedoen", presentation: "modal" }}
       />
-      <Stack.Screen name="[pouleId]" options={{ title: "Poule" }} />
+      {/* De titel komt mee als parameter, dan staat hij er al tijdens de overgang. */}
+      <Stack.Screen
+        name="[pouleId]/index"
+        options={({ route }) => ({
+          title: (route.params as { title?: string } | undefined)?.title ?? "",
+        })}
+      />
+      <Stack.Screen
+        name="[pouleId]/edit"
+        options={{ title: "Bewerk poule", presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="[pouleId]/member/[userId]"
+        options={({ route }) => ({
+          title: (route.params as { title?: string } | undefined)?.title ?? "",
+        })}
+      />
     </Stack>
   );
 }

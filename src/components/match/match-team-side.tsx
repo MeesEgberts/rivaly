@@ -16,7 +16,7 @@ export function MatchTeamSide({ team, isActive }: Props) {
 
   return (
     <View style={styles.side}>
-      <TeamBadge code={team.code} />
+      <TeamBadge code={team.code} imageUrl={team.imageUrl} />
       <Text
         numberOfLines={1}
         style={[

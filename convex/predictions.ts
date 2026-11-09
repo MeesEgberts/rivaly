@@ -6,14 +6,27 @@ import { fixturePredictionValidator } from "../modules/validators";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { isInPouleWithEvent } from "./lib/access";
-import { assertAthletesInPool } from "./lib/athletes";
-import { requireMembership, requireUser } from "./lib/auth";
+import {
+  assertAthletesInPool,
+  athleteIdsOf,
+  athletesAsParticipants,
+} from "./lib/athletes";
+import { getMembership, requireMembership, requireUser } from "./lib/auth";
+import {
+  isRevealed,
+  memberPredictionsForFixture,
+  type MemberPrediction,
+} from "./lib/reveal";
+import { eventPreview, type EventPreview } from "./lib/eventPreview";
 import { eventIdsForUser } from "./lib/userEvents";
 
 const MAX_OPEN_PER_EVENT = 30;
 const MAX_OPEN_TOTAL = 50;
 const MAX_FIXTURES_PER_EVENT = 500;
-const MAX_PREDICTIONS_PER_FIXTURE = 500;
+const MAX_POULES_PER_FIXTURE = 50;
+const MAX_EVENTS_PER_POULE = 20;
+const MAX_PARTICIPANTS = 500;
+const MAX_SCORES_PER_MEMBER = 2000;
 
 export const save = mutation({
   args: {
@@ -165,59 +178,238 @@ export const forFixtureInPoule = query({
       throw new ConvexError("Niet gevonden.");
     }
 
-    const revealed =
-      poule.settings.revealPredictions === "always" ||
-      args.now >= fixture.locksAt;
-
-    if (!revealed) {
+    if (!isRevealed(poule, fixture, args.now)) {
       return { revealed: false as const, predictions: [] };
     }
 
-    const members = await ctx.db
-      .query("pouleMembers")
-      .withIndex("by_poule", (q) => q.eq("pouleId", args.pouleId))
-      .take(MAX_PREDICTIONS_PER_FIXTURE);
+    return {
+      revealed: true as const,
+      predictions: await memberPredictionsForFixture(
+        ctx,
+        args.pouleId,
+        args.fixtureId,
+        user._id,
+      ),
+    };
+  },
+});
 
-    const predictions: {
-      userId: Id<"users">;
+/**
+ * Hetzelfde, maar voor élke poule van de gebruiker die dit onderdeel heeft.
+ * Voedt de kaart "Jouw poule" onder een voorspelling; het voorspelscherm
+ * weet zelf niet vanuit welke poule het geopend is.
+ */
+export const forFixtureInMyPoules = query({
+  args: { fixtureId: v.id("fixtures"), now: v.number() },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const fixture = await ctx.db.get("fixtures", args.fixtureId);
+
+    if (!fixture) {
+      throw new ConvexError("Onderdeel niet gevonden.");
+    }
+
+    const links = await ctx.db
+      .query("pouleEvents")
+      .withIndex("by_event", (q) => q.eq("eventId", fixture.eventId))
+      .take(MAX_POULES_PER_FIXTURE);
+
+    const poules: {
+      pouleId: Id<"poules">;
       name: string;
-      payload: Doc<"predictions">["payload"] | null;
-      points: number | null;
+      emoji: string | null;
+      revealed: boolean;
+      predictions: MemberPrediction[];
     }[] = [];
 
-    for (const member of members) {
-      const memberUser = await ctx.db.get("users", member.userId);
+    for (const link of links) {
+      const membership = await getMembership(ctx, link.pouleId, user._id);
+      const poule = membership ? await ctx.db.get("poules", link.pouleId) : null;
 
-      if (!memberUser) {
+      if (!poule || poule.status !== "open") {
         continue;
       }
 
-      const prediction = await ctx.db
-        .query("predictions")
-        .withIndex("by_user_and_fixture", (q) =>
-          q.eq("userId", member.userId).eq("fixtureId", args.fixtureId),
-        )
-        .unique();
+      const revealed = isRevealed(poule, fixture, args.now);
 
-      const score = await ctx.db
-        .query("scores")
-        .withIndex("by_poule_and_fixture_and_user", (q) =>
-          q
-            .eq("pouleId", args.pouleId)
-            .eq("fixtureId", args.fixtureId)
-            .eq("userId", member.userId),
-        )
-        .unique();
-
-      predictions.push({
-        userId: memberUser._id,
-        name: memberUser.name,
-        payload: prediction?.payload ?? null,
-        points: score?.points ?? null,
+      poules.push({
+        pouleId: poule._id,
+        name: poule.name,
+        emoji: poule.emoji ?? null,
+        revealed,
+        predictions: revealed
+          ? await memberPredictionsForFixture(
+              ctx,
+              poule._id,
+              args.fixtureId,
+              user._id,
+            )
+          : [],
       });
     }
 
-    return { revealed: true as const, predictions };
+    return poules.sort((a, b) => a.name.localeCompare(b.name, "nl"));
+  },
+});
+
+/**
+ * Alles wat één poulegenoot heeft ingevuld, per evenement van de poule, met
+ * de punten die het opleverde. Voorspellingen op nog open onderdelen blijven
+ * verborgen (tenzij de poule "altijd" tonen heeft gekozen).
+ */
+export const forMemberInPoule = query({
+  args: {
+    pouleId: v.id("poules"),
+    userId: v.id("users"),
+    now: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const me = await requireUser(ctx);
+    await requireMembership(ctx, args.pouleId, me._id);
+    await requireMembership(ctx, args.pouleId, args.userId);
+
+    const poule = await ctx.db.get("poules", args.pouleId);
+    const member = await ctx.db.get("users", args.userId);
+
+    if (!poule || !member) {
+      throw new ConvexError("Niet gevonden.");
+    }
+
+    const standing = await ctx.db
+      .query("standings")
+      .withIndex("by_poule_and_user", (q) =>
+        q.eq("pouleId", args.pouleId).eq("userId", args.userId),
+      )
+      .unique();
+
+    const scores = await ctx.db
+      .query("scores")
+      .withIndex("by_poule_and_user", (q) =>
+        q.eq("pouleId", args.pouleId).eq("userId", args.userId),
+      )
+      .take(MAX_SCORES_PER_MEMBER);
+    const pointsByFixture = new Map(
+      scores.map((score) => [score.fixtureId, score.points]),
+    );
+
+    const links = await ctx.db
+      .query("pouleEvents")
+      .withIndex("by_poule", (q) => q.eq("pouleId", args.pouleId))
+      .take(MAX_EVENTS_PER_POULE);
+
+    const events: {
+      eventId: Id<"events">;
+      name: string;
+      moduleKey: string;
+      logoUrl: string | null;
+      startsAt: number;
+      points: number;
+      participants: Awaited<ReturnType<typeof athletesAsParticipants>>;
+      fixtures: {
+        fixtureId: Id<"fixtures">;
+        type: Doc<"fixtures">["type"];
+        label: string | null;
+        payload: Doc<"fixtures">["payload"];
+        locksAt: number;
+        result: Doc<"fixtures">["result"] | null;
+        /** `false`: nog niet zichtbaar, dus `prediction` is dan altijd leeg. */
+        revealed: boolean;
+        prediction: Doc<"predictions">["payload"] | null;
+        points: number | null;
+      }[];
+    }[] = [];
+
+    for (const link of links) {
+      const event = await ctx.db.get("events", link.eventId);
+
+      if (!event) {
+        continue;
+      }
+
+      const fixtures = await ctx.db
+        .query("fixtures")
+        .withIndex("by_event_and_order", (q) => q.eq("eventId", event._id))
+        .take(MAX_FIXTURES_PER_EVENT);
+
+      const predictions = await ctx.db
+        .query("predictions")
+        .withIndex("by_user_and_event", (q) =>
+          q.eq("userId", args.userId).eq("eventId", event._id),
+        )
+        .take(MAX_FIXTURES_PER_EVENT);
+      const predictionByFixture = new Map(
+        predictions.map((prediction) => [
+          prediction.fixtureId,
+          prediction.payload,
+        ]),
+      );
+
+      // Je eigen voorspellingen zie je altijd; die van anderen pas na sluiting.
+      const rows = fixtures.map((fixture) => {
+        const revealed =
+          member._id === me._id || isRevealed(poule, fixture, args.now);
+        const prediction = revealed
+          ? (predictionByFixture.get(fixture._id) ?? null)
+          : null;
+
+        return {
+          fixtureId: fixture._id,
+          type: fixture.type,
+          label: fixture.label ?? null,
+          payload: fixture.payload,
+          locksAt: fixture.locksAt,
+          result: fixture.result ?? null,
+          revealed,
+          prediction,
+          points: pointsByFixture.get(fixture._id) ?? null,
+        };
+      });
+
+      const participants = await ctx.db
+        .query("participants")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .take(MAX_PARTICIPANTS);
+      const athletes = await athletesAsParticipants(
+        ctx,
+        rows.flatMap((row) =>
+          athleteIdsOf(row.payload, [row.result, row.prediction]),
+        ),
+      );
+
+      events.push({
+        eventId: event._id,
+        name: event.name,
+        moduleKey: event.moduleKey,
+        logoUrl: event.meta.logoUrl ?? null,
+        startsAt: event.startsAt,
+        points: rows.reduce((sum, row) => sum + (row.points ?? 0), 0),
+        participants: [
+          ...participants.map((participant) => ({
+            _id: participant._id as string,
+            name: participant.name,
+            shortName: participant.shortName ?? participant.name,
+            code: participant.code ?? "",
+            imageUrl: participant.imageUrl ?? null,
+            groupKey: null,
+          })),
+          ...athletes,
+        ],
+        fixtures: rows,
+      });
+    }
+
+    return {
+      member: {
+        userId: member._id,
+        name: member.name,
+        imageUrl: member.imageUrl ?? null,
+        isMe: member._id === me._id,
+        points: standing?.points ?? 0,
+        rank: standing?.rank ?? 0,
+        exact: standing?.stats.exact ?? 0,
+      },
+      events: events.sort((a, b) => a.startsAt - b.startsAt),
+    };
   },
 });
 
@@ -254,6 +446,8 @@ export const overview = query({
       eventId: Id<"events">;
       name: string;
       moduleKey: string;
+      logoUrl: string | null;
+      preview: EventPreview;
       open: number;
       predicted: number;
       nextLockAt: number | null;
@@ -317,6 +511,8 @@ export const overview = query({
         eventId,
         name: event.name,
         moduleKey: event.moduleKey,
+        logoUrl: event.meta.logoUrl ?? null,
+        preview: eventPreview(event),
         open,
         predicted,
         nextLockAt,

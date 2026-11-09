@@ -25,7 +25,7 @@ export function ScoreStepperColumn({
 
   return (
     <View style={styles.column}>
-      <TeamBadge code={team.code} size="large" />
+      <TeamBadge code={team.code} imageUrl={team.imageUrl} size="large" />
       <Text numberOfLines={2} style={[styles.name, { color: colors.label }]}>
         {team.name}
       </Text>

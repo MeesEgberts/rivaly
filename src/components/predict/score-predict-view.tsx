@@ -15,6 +15,7 @@ import { isFixtureOpen } from "@/utils/match-rows";
 import { participantInfo, UNKNOWN_PARTICIPANT } from "@/utils/participants";
 import { describeToto } from "@/utils/score-outcome";
 
+import { PoulePredictionsCard } from "./poule-predictions-card";
 import { ScorePredictResult } from "./score-predict-result";
 
 interface Props {
@@ -153,6 +154,7 @@ export function ScorePredictView({ fixture }: Props) {
         ) : (
           <ScorePredictResult fixture={fixture} />
         )}
+        <PoulePredictionsCard fixture={fixture} />
       </ScrollView>
 
       <ModalToolbar

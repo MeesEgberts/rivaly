@@ -20,6 +20,7 @@ export interface OptionInfo {
   id: string;
   name: string;
   code: string | null;
+  imageUrl: string | null;
 }
 
 /** Waar een onderdeel staat, voor de strip en de statuslabel op een kaart. */
@@ -109,7 +110,12 @@ export function optionInfo(
   const participant = participants.get(id);
 
   if (participant) {
-    return { id, name: participant.shortName, code: participant.code };
+    return {
+      id,
+      name: participant.shortName,
+      code: participant.code,
+      imageUrl: participant.imageUrl,
+    };
   }
 
   const label =
@@ -117,7 +123,7 @@ export function optionInfo(
       ? payload.options.find((option) => option.id === id)?.label
       : undefined;
 
-  return { id, name: label ?? "Onbekend", code: null };
+  return { id, name: label ?? "Onbekend", code: null, imageUrl: null };
 }
 
 /** Korte weergave van een antwoord voor op een kaart: renner, getal of keuze. */

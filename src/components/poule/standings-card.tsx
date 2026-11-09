@@ -1,19 +1,25 @@
+import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
+import type { Id } from "@convex/_generated/dataModel";
 import { Card } from "@/components/cards/card";
 import { CardRow } from "@/components/cards/card-row";
 import { Avatar } from "@/components/ui/avatar";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { standingSubtitle, type StandingRow } from "@/utils/poules";
+import { firstName, standingSubtitle, type StandingRow } from "@/utils/poules";
 
 import { RankBadge } from "./rank-badge";
 
 interface Props {
+  pouleId: Id<"poules">;
   rows: StandingRow[];
 }
 
-/** De volledige stand: plek, avatar, naam, statistiek en punten; jij gemarkeerd. */
-export function StandingsCard({ rows }: Props) {
+/**
+ * De volledige stand: plek, avatar, naam, statistiek en punten; jij
+ * gemarkeerd. Tik een lid om te zien wat hij heeft ingevuld.
+ */
+export function StandingsCard({ pouleId, rows }: Props) {
   const colors = useAppColors();
 
   return (
@@ -38,6 +44,17 @@ export function StandingsCard({ rows }: Props) {
               </Text>
             </Text>
           }
+          onPress={() =>
+            router.push({
+              pathname: "/poules/[pouleId]/member/[userId]",
+              params: {
+                pouleId,
+                userId: row.userId,
+                title: firstName(row.name),
+              },
+            })
+          }
+          hideChevron
           isHighlighted={row.isMe}
           isLast={index === rows.length - 1}
         />

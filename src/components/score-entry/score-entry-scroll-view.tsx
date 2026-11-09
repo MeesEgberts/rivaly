@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  ScrollView,
+  Animated,
   StyleSheet,
   View,
   type HostInstance,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useEventScroll } from "@/hooks/use-event-scroll";
 
 import {
   ScoreEntryContext,
@@ -34,7 +35,7 @@ interface Props {
 /**
  * Scrollende lijst met snelle score-invoer: tik een vak, tik cijfers, en
  * het cijferblok loopt vanzelf door alle wedstrijden. Rijen binnen deze view
- * gebruiken `useScoreEntry()`.
+ * gebruiken `useScoreEntry()`. Bovenaan staat de kop van het evenement.
  */
 export function ScoreEntryScrollView({ matches, children }: Props) {
   const colors = useAppColors();
@@ -47,6 +48,20 @@ export function ScoreEntryScrollView({ matches, children }: Props) {
   const bottomSpace = isEditing ? keypadHeight + 24 : 32;
 
   const { onScroll, keepVisible } = useKeepRowVisible(scrollRef, keypadHeight);
+  const {
+    header,
+    scrollRef: registerScroll,
+    scrollProps,
+  } = useEventScroll(onScroll);
+
+  // Zelf scrollen (rij in beeld houden) én het scherm laten verschuiven.
+  const setScrollView = useCallback(
+    (node: ScrollViewInstance | null) => {
+      scrollRef.current = node;
+      registerScroll(node);
+    },
+    [registerScroll],
+  );
 
   const registerRow = useCallback(
     (fixtureId: string, view: HostInstance | null) => {
@@ -81,16 +96,15 @@ export function ScoreEntryScrollView({ matches, children }: Props) {
   return (
     <ScoreEntryContext.Provider value={contextValue}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <ScrollView
-          ref={scrollRef}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
+        <Animated.ScrollView
+          ref={setScrollView}
+          {...scrollProps}
           keyboardShouldPersistTaps="handled"
-          contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{ paddingBottom: bottomSpace }}
         >
+          {header}
           {children}
-        </ScrollView>
+        </Animated.ScrollView>
 
         {isEditing ? (
           <ScoreKeypad

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 
 import type { Id } from "@convex/_generated/dataModel";
 import { cyclingStageKinds } from "@modules/cycling/module";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useEventData } from "@/hooks/use-event-data";
+import { useEventScroll } from "@/hooks/use-event-scroll";
 import { useNow } from "@/hooks/use-now";
 import {
   fixtureCardStatus,
@@ -28,6 +29,7 @@ export function RaceTab({ eventId }: Props) {
   const colors = useAppColors();
   const now = useNow();
   const { event, fixtures, participants, isLoading } = useEventData(eventId);
+  const { header, scrollRef, scrollProps } = useEventScroll();
 
   const questions = useMemo(() => {
     if (!event || !fixtures) {
@@ -47,48 +49,53 @@ export function RaceTab({ eventId }: Props) {
   const others = questions.filter((fixture) => fixture !== podium);
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="never"
+    <Animated.ScrollView
+      ref={scrollRef}
+      {...scrollProps}
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.scroll}
     >
-      {podium ? (
-        <>
-          <CourseCard
-            caption={event.seriesNames[0] ?? "Eendagskoers"}
-            fallbackTitle={event.name}
-            details={podium.details}
-            startsAt={podium.startsAt}
-            locksAt={podium.locksAt}
-            status={fixtureCardStatus(podium, now)}
-            now={now}
-          />
-          <RankingPodium
-            fixture={podium}
-            status={fixtureCardStatus(podium, now)}
-            participants={participants}
-          />
-        </>
-      ) : null}
-
-      {others.length > 0 ? (
-        <>
-          <SectionTitle>Extra vragen</SectionTitle>
-          {others.map((fixture) => (
-            <QuestionCard
-              key={fixture._id}
-              fixture={fixture}
-              icon={questionIcon(fixture, participants)}
-              participants={participants}
-              isOpen={isFixtureOpen(fixture, now)}
+      {header}
+      <View style={styles.content}>
+        {podium ? (
+          <>
+            <CourseCard
+              caption="Start"
+              fallbackTitle={event.name}
+              details={podium.details}
+              startsAt={podium.startsAt}
+              locksAt={podium.locksAt}
+              status={fixtureCardStatus(podium, now)}
+              now={now}
             />
-          ))}
-        </>
-      ) : null}
-    </ScrollView>
+            <RankingPodium
+              fixture={podium}
+              status={fixtureCardStatus(podium, now)}
+              participants={participants}
+            />
+          </>
+        ) : null}
+
+        {others.length > 0 ? (
+          <>
+            <SectionTitle>Extra vragen</SectionTitle>
+            {others.map((fixture) => (
+              <QuestionCard
+                key={fixture._id}
+                fixture={fixture}
+                icon={questionIcon(fixture, participants)}
+                participants={participants}
+                isOpen={isFixtureOpen(fixture, now)}
+              />
+            ))}
+          </>
+        ) : null}
+      </View>
+    </Animated.ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 16, paddingBottom: 120 },
+  scroll: { paddingBottom: 120 },
+  content: { padding: 16, gap: 16 },
 });

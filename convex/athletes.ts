@@ -38,6 +38,7 @@ export const search = query({
       name: athlete.name,
       shortName: athlete.shortName,
       nation: athlete.nation,
+      imageUrl: athlete.imageUrl ?? null,
     }));
   },
 });

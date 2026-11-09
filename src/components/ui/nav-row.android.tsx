@@ -1,4 +1,9 @@
-import { ListItem, Text, useMaterialColors } from "@expo/ui/jetpack-compose";
+import {
+  ListItem,
+  RNHostView,
+  Text,
+  useMaterialColors,
+} from "@expo/ui/jetpack-compose";
 import { clickable, fillMaxWidth } from "@expo/ui/jetpack-compose/modifiers";
 
 import type { NavRowProps } from "./nav-row";
@@ -12,6 +17,7 @@ export function NavRow({
   subtitle,
   value,
   leadingText,
+  leading,
   onPress,
   highlighted,
   selected,
@@ -51,7 +57,11 @@ export function NavRow({
           </Text>
         </ListItem.SupportingContent>
       ) : null}
-      {leadingText ? (
+      {leading ? (
+        <ListItem.LeadingContent>
+          <RNHostView matchContents>{leading}</RNHostView>
+        </ListItem.LeadingContent>
+      ) : leadingText ? (
         <ListItem.LeadingContent>
           <Text style={{ typography: "headlineSmall" }}>{leadingText}</Text>
         </ListItem.LeadingContent>

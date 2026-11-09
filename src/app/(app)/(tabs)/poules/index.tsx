@@ -5,7 +5,8 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { api } from "@convex/_generated/api";
 import { EmptyCard } from "@/components/cards/empty-card";
 import { SectionTitle } from "@/components/cards/section-title";
-import { LoadingScreen } from "@/components/loading-screen";
+import { PoulesSkeleton } from "@/components/skeleton/poules-skeleton";
+import { SkeletonScreen } from "@/components/skeleton/skeleton-screen";
 import { ActionTile } from "@/components/poule/action-tile";
 import { PouleCard } from "@/components/poule/poule-card";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -19,7 +20,11 @@ export default function PoulesScreen() {
   const poules = useQuery(api.poules.listMine);
 
   if (poules === undefined) {
-    return <LoadingScreen />;
+    return (
+      <SkeletonScreen>
+        <PoulesSkeleton />
+      </SkeletonScreen>
+    );
   }
 
   return (

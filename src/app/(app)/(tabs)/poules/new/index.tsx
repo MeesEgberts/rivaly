@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 
 import { api } from "@convex/_generated/api";
-import { LoadingScreen } from "@/components/loading-screen";
+import { ListSkeleton } from "@/components/skeleton/list-skeleton";
 import { AppText } from "@/components/ui/app-text";
 import { LabeledPicker } from "@/components/ui/labeled-picker";
 import { NavRow } from "@/components/ui/nav-row";
@@ -49,11 +49,8 @@ export default function NewPouleScreen() {
   const activePreset =
     presets.find((preset) => preset.key === presetKey) ?? presets[0] ?? null;
 
-  if (catalog === undefined) {
-    return <LoadingScreen />;
-  }
-
-  const canSubmit = name.trim().length >= 2 && activePreset !== null;
+  const canSubmit =
+    catalog !== undefined && name.trim().length >= 2 && activePreset !== null;
 
   const submit = async () => {
     if (!activePreset) {
@@ -79,13 +76,27 @@ export default function NewPouleScreen() {
     }
   };
 
+  // De knoppen staan er vanaf het openen, ook als de catalogus nog laadt.
+  const toolbar = (
+    <ModalToolbar
+      onConfirm={submit}
+      isConfirmDisabled={busy || !canSubmit}
+      confirmLabel="Poule aanmaken"
+    />
+  );
+
+  if (catalog === undefined) {
+    return (
+      <>
+        {toolbar}
+        <ListSkeleton sections={[2, 1, 1]} leading="none" />
+      </>
+    );
+  }
+
   return (
     <Screen>
-      <ModalToolbar
-        onConfirm={submit}
-        isConfirmDisabled={busy || !canSubmit}
-        confirmLabel="Poule aanmaken"
-      />
+      {toolbar}
 
       <Section title="Naam">
         <TextInput

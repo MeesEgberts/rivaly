@@ -1,20 +1,25 @@
 import { v } from "convex/values";
 
 import { cyclingStageKinds } from "../modules/cycling/module";
-import { OTHER_OPTION_ID } from "../modules/fixture-types/pick";
-import type { FixtureDetails } from "../modules/validators";
+import { JERSEYS, type Jersey } from "../modules/cycling/stage-profile";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import { athleteSearchText } from "./lib/athletes";
+import { insertOneDayRace } from "./lib/cyclingRace";
 import {
   ALL_RIDERS,
   CLASSICS_2027,
+  GIRO_2027_STAGE_DATES,
+  GIRO_WEEK_STARTS,
   TEST_TOUR_STAGES,
   TOUR_2027_STAGE_DATES,
   TOUR_CLASSIFICATIONS,
   TOUR_RIDERS,
-  TOUR_TEAMS,
+  GRAND_TOUR_TEAMS,
+  LEGACY_TOUR_TEAMS,
   TOUR_WEEK_STARTS,
+  VUELTA_2027_STAGE_DATES,
+  VUELTA_WEEK_STARTS,
   type SeedClassic,
   type SeedRider,
   type SeedStage,
@@ -108,6 +113,114 @@ function riderOptions(riders: SeedRider[], ids: RiderIds) {
   });
 }
 
+const MAX_PARTICIPANTS = 100;
+
+/**
+ * Zet alle ploegen als deelnemers in het evenement (bestaande worden
+ * hergebruikt op code) en geeft ze terug als keuzes voor een vraag.
+ */
+async function insertTeams(
+  ctx: MutationCtx,
+  eventId: Id<"events">,
+): Promise<{ id: string; label: string }[]> {
+  const existing = await ctx.db
+    .query("participants")
+    .withIndex("by_event", (q) => q.eq("eventId", eventId))
+    .take(MAX_PARTICIPANTS);
+  const byCode = new Map(
+    existing.map((participant) => [participant.code, participant._id]),
+  );
+  const options: { id: string; label: string }[] = [];
+
+  for (const seedTeam of GRAND_TOUR_TEAMS) {
+    const id =
+      byCode.get(seedTeam.code) ??
+      (await ctx.db.insert("participants", {
+        eventId,
+        name: seedTeam.name,
+        shortName: seedTeam.shortName,
+        code: seedTeam.code,
+      }));
+
+    options.push({ id, label: seedTeam.name });
+  }
+
+  return options;
+}
+
+/**
+ * Eenmalig: rondes van vóór de ploegen deelnemers waren. De ploegvraag krijgt
+ * alle ploegen (met logo) en geen "Andere ploeg" meer; voorspellingen op een
+ * oude ploeg gaan mee, "Andere ploeg" vervalt.
+ *
+ * Draaien: `npx convex run seedCycling:teamsAsParticipants`
+ */
+export const teamsAsParticipants = internalMutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const events = await ctx.db.query("events").take(200);
+    let converted = 0;
+
+    for (const event of events) {
+      if (event.moduleKey !== "cycling") {
+        continue;
+      }
+
+      const fixtures = await ctx.db
+        .query("fixtures")
+        .withIndex("by_event_and_order", (q) => q.eq("eventId", event._id))
+        .take(200);
+
+      for (const fixture of fixtures) {
+        const payload = fixture.payload;
+        const isLegacy =
+          payload.type === "pick" &&
+          payload.options.some((option) => option.id.startsWith("team-"));
+
+        if (!isLegacy) {
+          continue;
+        }
+
+        const options = await insertTeams(ctx, event._id);
+        const idByName = new Map(options.map((option) => [option.label, option.id]));
+        const remap = (id: string) => {
+          const index = Number(id.replace("team-", ""));
+          return idByName.get(LEGACY_TOUR_TEAMS[index] ?? "") ?? null;
+        };
+
+        await ctx.db.patch("fixtures", fixture._id, {
+          payload: { type: "pick", options },
+        });
+
+        const predictions = await ctx.db
+          .query("predictions")
+          .withIndex("by_fixture", (q) => q.eq("fixtureId", fixture._id))
+          .take(1000);
+
+        for (const prediction of predictions) {
+          const chosen =
+            prediction.payload.type === "pick"
+              ? remap(prediction.payload.optionId)
+              : null;
+
+          if (chosen) {
+            await ctx.db.patch("predictions", prediction._id, {
+              payload: { type: "pick", optionId: chosen },
+            });
+          } else {
+            await ctx.db.delete("predictions", prediction._id);
+          }
+        }
+
+        converted += 1;
+      }
+    }
+
+    return converted;
+  },
+});
+
 async function eventExists(ctx: MutationCtx, slug: string): Promise<boolean> {
   const existing = await ctx.db
     .query("events")
@@ -117,10 +230,7 @@ async function eventExists(ctx: MutationCtx, slug: string): Promise<boolean> {
   return existing !== null;
 }
 
-/**
- * Eendagskoers: podium (top 3), beste Nederlander en het aantal
- * Nederlanders in de top 10. Alles sluit bij de start.
- */
+/** Eendagskoers uit de kalender; de opbouw staat in `lib/cyclingRace.ts`. */
 async function insertClassic(
   ctx: MutationCtx,
   classic: SeedClassic,
@@ -133,80 +243,25 @@ async function insertClassic(
     return null;
   }
 
-  const startsAt = Date.parse(classic.startsAt);
-
-  const eventId = await ctx.db.insert("events", {
-    moduleKey: "cycling",
+  return await insertOneDayRace(ctx, {
     name: classic.name,
+    shortName: classic.shortName,
     slug,
-    startsAt,
-    endsAt: startsAt + 7 * HOUR,
-    status: "upcoming",
+    startsAt: Date.parse(classic.startsAt),
     visibility: "public",
     createdBy,
-    meta: { shortName: classic.shortName, series: classic.series },
-  });
-
-  const dutchRiders = classic.riders.filter((rider) => rider.nation === "NED");
-
-  const stageId = await ctx.db.insert("stages", {
-    eventId,
-    key: "race",
-    name: "Koers",
-    order: 0,
-    kind: cyclingStageKinds.race,
-  });
-
-  const details: FixtureDetails = {
-    route: classic.route,
-    distanceKm: classic.distanceKm,
-    profile: classic.profile,
-  };
-  const timing = {
-    eventId,
-    stageId,
-    startsAt,
-    locksAt: startsAt,
-    status: "scheduled" as const,
-  };
-
-  await ctx.db.insert("fixtures", {
-    ...timing,
-    type: "ranking",
-    order: 0,
-    label: "Podium",
-    details,
-    payload: {
-      type: "ranking",
-      size: 3,
-      options: riderOptions(classic.riders, riderIds),
-      pool: POOL,
+    series: classic.series,
+    details: {
+      route: classic.route,
+      distanceKm: classic.distanceKm,
+      profile: classic.profile,
     },
+    favourites: classic.riders.map((rider) => ({
+      ...riderOptions([rider], riderIds)[0],
+      nation: rider.nation,
+    })),
+    includeDutchQuestions: true,
   });
-
-  if (dutchRiders.length > 0) {
-    await ctx.db.insert("fixtures", {
-      ...timing,
-      type: "pick",
-      order: 1,
-      label: "Beste Nederlander",
-      payload: {
-        type: "pick",
-        options: riderOptions(dutchRiders, riderIds),
-        pool: { sport: SPORT, nation: "NED" },
-      },
-    });
-  }
-
-  await ctx.db.insert("fixtures", {
-    ...timing,
-    type: "numeric",
-    order: 2,
-    label: "Nederlanders in de top 10",
-    payload: { type: "numeric", min: 0, max: 10, step: 1 },
-  });
-
-  return eventId;
 }
 
 interface GrandTourInput {
@@ -217,9 +272,39 @@ interface GrandTourInput {
   /** Etappenummers waarop een nieuwe week begint, bijv. [1, 10, 16]. */
   weekStarts: number[];
   series: string[];
+  /** Truien van deze ronde, bijv. geel/groen/bollen/wit voor de Tour. */
+  jerseys: GrandTourJerseys;
   riderIds: RiderIds;
   createdBy: Id<"users">;
 }
+
+interface GrandTourJerseys {
+  gc: Jersey;
+  points: Jersey;
+  mountains: Jersey;
+  youth: Jersey;
+}
+
+const TOUR_JERSEYS: GrandTourJerseys = {
+  gc: "yellow",
+  points: "green",
+  mountains: "polka",
+  youth: "white",
+};
+
+const GIRO_JERSEYS: GrandTourJerseys = {
+  gc: "pink",
+  points: "purple",
+  mountains: "blue",
+  youth: "white",
+};
+
+const VUELTA_JERSEYS: GrandTourJerseys = {
+  gc: "red",
+  points: "green",
+  mountains: "polkaBlue",
+  youth: "white",
+};
 
 /**
  * Grote ronde: vooraf de klassementen (eindklassement, truien, ploeg,
@@ -287,7 +372,7 @@ async function insertGrandTour(
     type: "ranking",
     order: order++,
     label: "Eindklassement top 5",
-    details: { jersey: "yellow" },
+    details: { jersey: input.jerseys.gc },
     payload: {
       type: "ranking",
       size: 5,
@@ -297,21 +382,9 @@ async function insertGrandTour(
   });
 
   const jerseys = [
-    {
-      label: "Groene trui",
-      jersey: "green" as const,
-      riders: TOUR_CLASSIFICATIONS.points,
-    },
-    {
-      label: "Bolletjestrui",
-      jersey: "polka" as const,
-      riders: TOUR_CLASSIFICATIONS.mountains,
-    },
-    {
-      label: "Witte trui",
-      jersey: "white" as const,
-      riders: TOUR_CLASSIFICATIONS.youth,
-    },
+    { jersey: input.jerseys.points, riders: TOUR_CLASSIFICATIONS.points },
+    { jersey: input.jerseys.mountains, riders: TOUR_CLASSIFICATIONS.mountains },
+    { jersey: input.jerseys.youth, riders: TOUR_CLASSIFICATIONS.youth },
   ];
 
   for (const jersey of jerseys) {
@@ -319,7 +392,7 @@ async function insertGrandTour(
       ...beforeStart,
       type: "pick",
       order: order++,
-      label: jersey.label,
+      label: JERSEYS[jersey.jersey].name,
       details: { jersey: jersey.jersey },
       payload: {
         type: "pick",
@@ -337,13 +410,7 @@ async function insertGrandTour(
     details: { icon: "person.3.fill" },
     payload: {
       type: "pick",
-      options: [
-        ...TOUR_TEAMS.map((team, index) => ({
-          id: `team-${index}`,
-          label: team,
-        })),
-        { id: OTHER_OPTION_ID, label: "Andere ploeg" },
-      ],
+      options: await insertTeams(ctx, eventId),
     },
   });
 
@@ -415,12 +482,49 @@ export const calendar2027 = internalMutation({
       })),
       weekStarts: TOUR_WEEK_STARTS,
       series: ["grandTours"],
+      jerseys: TOUR_JERSEYS,
       riderIds,
       createdBy,
     });
 
     if (tour) {
       created.push(tour);
+    }
+
+    const giro = await insertGrandTour(ctx, {
+      name: "Giro d'Italia 2027",
+      shortName: "Giro",
+      slug: "cycling-giro-d-italia-2027",
+      stages: GIRO_2027_STAGE_DATES.map((date) => ({
+        startsAt: `${date}T13:00:00+02:00`,
+      })),
+      weekStarts: GIRO_WEEK_STARTS,
+      series: ["grandTours"],
+      jerseys: GIRO_JERSEYS,
+      riderIds,
+      createdBy,
+    });
+
+    if (giro) {
+      created.push(giro);
+    }
+
+    const vuelta = await insertGrandTour(ctx, {
+      name: "Vuelta a España 2027",
+      shortName: "Vuelta",
+      slug: "cycling-vuelta-a-espana-2027",
+      stages: VUELTA_2027_STAGE_DATES.map((date) => ({
+        startsAt: `${date}T13:00:00+02:00`,
+      })),
+      weekStarts: VUELTA_WEEK_STARTS,
+      series: ["grandTours"],
+      jerseys: VUELTA_JERSEYS,
+      riderIds,
+      createdBy,
+    });
+
+    if (vuelta) {
+      created.push(vuelta);
     }
 
     return created;
@@ -452,6 +556,7 @@ export const testTour = internalMutation({
       })),
       weekStarts: [1],
       series: [],
+      jerseys: TOUR_JERSEYS,
       riderIds,
       createdBy,
     });

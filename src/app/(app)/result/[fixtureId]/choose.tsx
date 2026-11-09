@@ -4,7 +4,7 @@ import { useLocalSearchParams } from "expo-router";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { AthleteChooseScreen } from "@/components/athletes/athlete-choose-screen";
-import { LoadingScreen } from "@/components/loading-screen";
+import { ListSkeleton } from "@/components/skeleton/list-skeleton";
 
 /** Een renner kiezen voor een plek op het podium, of hem vervangen. */
 export default function ChooseAthleteScreen() {
@@ -15,7 +15,7 @@ export default function ChooseAthleteScreen() {
   const fixture = useQuery(api.events.fixture, { fixtureId });
 
   if (fixture === undefined) {
-    return <LoadingScreen />;
+    return <ListSkeleton sections={[8]} leading="circle" />;
   }
 
   return (

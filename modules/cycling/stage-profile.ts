@@ -89,6 +89,11 @@ export const jerseyValidator = v.union(
   v.literal("green"),
   v.literal("polka"),
   v.literal("white"),
+  v.literal("pink"),
+  v.literal("purple"),
+  v.literal("blue"),
+  v.literal("red"),
+  v.literal("polkaBlue"),
 );
 
 export type Jersey = Infer<typeof jerseyValidator>;
@@ -99,4 +104,9 @@ export const JERSEYS: Record<Jersey, { name: string; classification: string }> =
     green: { name: "Groene trui", classification: "Puntenklassement" },
     polka: { name: "Bolletjestrui", classification: "Bergklassement" },
     white: { name: "Witte trui", classification: "Jongerenklassement" },
+    pink: { name: "Roze trui", classification: "Klassement" },
+    purple: { name: "Paarse trui", classification: "Puntenklassement" },
+    blue: { name: "Blauwe trui", classification: "Bergklassement" },
+    red: { name: "Rode trui", classification: "Klassement" },
+    polkaBlue: { name: "Bolletjestrui", classification: "Bergklassement" },
   };

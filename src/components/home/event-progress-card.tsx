@@ -3,11 +3,11 @@ import { SymbolView } from "expo-symbols";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/cards/card";
-import { SymbolBadge } from "@/components/cards/symbol-badge";
+import { EventMark } from "@/components/event/event-mark";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { eventHref } from "@/utils/event-preview";
 import { eventProgressText, type OverviewEvent } from "@/utils/home";
-import { moduleIcon } from "@/utils/sport-icon";
 
 interface Props {
   event: OverviewEvent;
@@ -21,12 +21,16 @@ export function EventProgressCard({ event, now }: Props) {
 
   return (
     <Card
-      onPress={() => router.push(`/events/${event.eventId}`)}
+      onPress={() => router.push(eventHref(event.eventId, event.preview))}
       accessibilityLabel={event.name}
     >
       <View style={styles.content}>
         <View style={styles.row}>
-          <SymbolBadge name={moduleIcon(event.moduleKey)} size={44} />
+          <EventMark
+            logoUrl={event.logoUrl}
+            imageUrl={event.preview.imageUrl}
+            moduleKey={event.moduleKey}
+          />
           <View style={styles.text}>
             <Text
               numberOfLines={1}

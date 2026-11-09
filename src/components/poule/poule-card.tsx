@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/cards/card";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { pouleSummary, type MyPoule } from "@/utils/poules";
+import { pouleSummary, pouleTitle, type MyPoule } from "@/utils/poules";
 import { moduleIcon } from "@/utils/sport-icon";
 
 import { PouleEmoji } from "./poule-emoji";
@@ -20,7 +20,13 @@ export function PouleCard({ poule }: Props) {
 
   return (
     <Card
-      onPress={() => router.push(`/poules/${poule._id}`)}
+      onPress={() =>
+        router.push({
+          pathname: "/poules/[pouleId]",
+          // De titel gaat mee, zodat de balk hem al tijdens de overgang toont.
+          params: { pouleId: poule._id, title: pouleTitle(poule) },
+        })
+      }
       accessibilityLabel={poule.name}
     >
       <View style={styles.row}>

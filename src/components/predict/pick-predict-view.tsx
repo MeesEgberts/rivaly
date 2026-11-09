@@ -9,6 +9,7 @@ import { isFixtureOpen } from "@/utils/match-rows";
 
 import { PredictHeaderCard } from "./predict-header-card";
 import { PredictLockedCard } from "./predict-locked-card";
+import { PoulePredictionsCard } from "./poule-predictions-card";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import { TeamPickCard } from "./team-pick-card";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
@@ -77,6 +78,7 @@ export function PickPredictView({ fixture }: Props) {
                   key={option.id}
                   label={participants.get(option.id)?.shortName ?? option.label}
                   code={participants.get(option.id)?.code ?? null}
+                  imageUrl={participants.get(option.id)?.imageUrl}
                   isSelected={selected === option.id}
                   onPress={() => choose(option.id)}
                 />
@@ -86,6 +88,7 @@ export function PickPredictView({ fixture }: Props) {
         ) : (
           <PredictLockedCard fixture={fixture} />
         )}
+        <PoulePredictionsCard fixture={fixture} />
       </ScrollView>
     </>
   );

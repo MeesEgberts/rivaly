@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { SFSymbol } from "sf-symbols-typescript";
 
 export interface NavRowProps {
@@ -9,6 +10,11 @@ export interface NavRowProps {
   value?: string;
   /** Emoji of ander kort teken links in plaats van een icoon. */
   leadingText?: string;
+  /**
+   * Eigen beeld links, bijv. het logo van een competitie (een React
+   * Native-view van 32 × 32). Heeft voorrang op `icon` en `leadingText`.
+   */
+  leading?: ReactElement;
   onPress?: () => void;
   /** Markeert de rij, bijv. de eigen regel in een stand. */
   highlighted?: boolean;

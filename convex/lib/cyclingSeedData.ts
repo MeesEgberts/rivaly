@@ -255,7 +255,55 @@ export const TOUR_CLASSIFICATIONS = {
   youth: [DEL_TORO, SEIXAS, MARTINEZ, WIDAR, RICCITELLO, ONLEY],
 };
 
-export const TOUR_TEAMS = [
+export interface SeedTeam {
+  name: string;
+  /** Kort voor krappe plekken, bijv. "Visma". */
+  shortName: string;
+  /** UCI-teamcode, voor de badge. */
+  code: string;
+  /** Engelstalig Wikipedia-artikel, om het logo op te zoeken. */
+  wiki: string;
+}
+
+const team = (
+  name: string,
+  shortName: string,
+  code: string,
+  wiki: string,
+): SeedTeam => ({ name, shortName, code, wiki });
+
+/**
+ * Ploegen in een grote ronde: de 18 WorldTeams van 2026 en de ProTeams die
+ * vaak een wildcard krijgen. Zo is "Andere ploeg" niet nodig. Pas de lijst
+ * aan zodra de startlijst van 2027 bekend is.
+ */
+export const GRAND_TOUR_TEAMS: SeedTeam[] = [
+  team("UAE Team Emirates XRG", "UAE", "UAD", "UAE Team Emirates XRG"),
+  team("Team Visma | Lease a Bike", "Visma", "TVL", "Team Visma–Lease a Bike"),
+  team("Red Bull-BORA-hansgrohe", "Red Bull", "RBH", "Red Bull–Bora–Hansgrohe"),
+  team("Lidl-Trek", "Lidl-Trek", "LTK", "Lidl–Trek"),
+  team("Soudal Quick-Step", "Soudal", "SOQ", "Soudal–Quick-Step"),
+  team("Alpecin-Premier Tech", "Alpecin", "APT", "Alpecin–Deceuninck"),
+  team("INEOS Grenadiers", "INEOS", "IGD", "Ineos Grenadiers"),
+  team("Decathlon CMA CGM", "Decathlon", "DCT", "Decathlon AG2R La Mondiale"),
+  team("EF Education-EasyPost", "EF", "EFE", "EF Education–EasyPost"),
+  team("Movistar Team", "Movistar", "MOV", "Movistar Team"),
+  team("Groupama-FDJ", "FDJ", "GFC", "Groupama–FDJ"),
+  team("Bahrain Victorious", "Bahrain", "TBV", "Team Bahrain Victorious"),
+  team("Team Jayco AlUla", "Jayco", "JAY", "Team Jayco–AlUla"),
+  team("XDS Astana Team", "Astana", "XAT", "Astana Qazaqstan Team"),
+  team("Team Picnic PostNL", "Picnic", "TPP", "Team Picnic–PostNL"),
+  team("Lotto Intermarché", "Lotto", "LOI", "Lotto–Dstny"),
+  team("Uno-X Mobility", "Uno-X", "UXM", "Uno-X Mobility"),
+  team("NSN Cycling Team", "NSN", "NSN", "Israel–Premier Tech"),
+  team("Tudor Pro Cycling", "Tudor", "TUD", "Tudor Pro Cycling Team"),
+  team("TotalEnergies", "TotalEnergies", "TEN", "Team TotalEnergies"),
+  team("Cofidis", "Cofidis", "COF", "Cofidis (cycling team)"),
+  team("Q36.5 Pro Cycling", "Q36.5", "Q36", "Q36.5 Pro Cycling Team"),
+];
+
+/** De namen van vóór de ploegen deelnemers werden, voor het omzetten. */
+export const LEGACY_TOUR_TEAMS = [
   "UAE Team Emirates XRG",
   "Team Visma | Lease a Bike",
   "Red Bull-BORA-hansgrohe",
@@ -454,6 +502,70 @@ export const TOUR_2027_STAGE_DATES = [
 
 /** In welke week (fase) elke etappe valt: 1–9, 10–15, 16–21. */
 export const TOUR_WEEK_STARTS = [1, 10, 16];
+
+/**
+ * Giro d'Italia 2027: schatting op basis van voorgaande jaren. Start op
+ * zaterdag 8 mei, rustdagen na etappe 9 en 15, finish op zondag 30 mei. Pas
+ * aan zodra de officiële kalender er is.
+ */
+export const GIRO_2027_STAGE_DATES = [
+  "2027-05-08",
+  "2027-05-09",
+  "2027-05-10",
+  "2027-05-11",
+  "2027-05-12",
+  "2027-05-13",
+  "2027-05-14",
+  "2027-05-15",
+  "2027-05-16",
+  "2027-05-18",
+  "2027-05-19",
+  "2027-05-20",
+  "2027-05-21",
+  "2027-05-22",
+  "2027-05-23",
+  "2027-05-25",
+  "2027-05-26",
+  "2027-05-27",
+  "2027-05-28",
+  "2027-05-29",
+  "2027-05-30",
+];
+
+/** In welke week (fase) elke Giro-etappe valt: 1–9, 10–15, 16–21. */
+export const GIRO_WEEK_STARTS = [1, 10, 16];
+
+/**
+ * Vuelta a España 2027: schatting op basis van voorgaande jaren. Start op
+ * zaterdag 21 augustus, rustdagen na etappe 9 en 15, finish op zondag 12
+ * september. Pas aan zodra de officiële kalender er is.
+ */
+export const VUELTA_2027_STAGE_DATES = [
+  "2027-08-21",
+  "2027-08-22",
+  "2027-08-23",
+  "2027-08-24",
+  "2027-08-25",
+  "2027-08-26",
+  "2027-08-27",
+  "2027-08-28",
+  "2027-08-29",
+  "2027-08-31",
+  "2027-09-01",
+  "2027-09-02",
+  "2027-09-03",
+  "2027-09-04",
+  "2027-09-05",
+  "2027-09-07",
+  "2027-09-08",
+  "2027-09-09",
+  "2027-09-10",
+  "2027-09-11",
+  "2027-09-12",
+];
+
+/** In welke week (fase) elke Vuelta-etappe valt: 1–9, 10–15, 16–21. */
+export const VUELTA_WEEK_STARTS = [1, 10, 16];
 
 /** Een korte testronde met bestaande wegen, om alles te kunnen proberen. */
 export const TEST_TOUR_STAGES: Omit<SeedStage, "startsAt">[] = [

@@ -2,7 +2,7 @@ import { SymbolView } from "expo-symbols";
 import { StyleSheet, View } from "react-native";
 
 import type { Jersey } from "@modules/cycling/stage-profile";
-import { JERSEY_COLORS, POLKA_DOT_COLOR } from "@/constants/cycling-colors";
+import { JERSEY_COLORS, POLKA_DOT_COLORS } from "@/constants/cycling-colors";
 import { useAppColors } from "@/hooks/use-app-colors";
 
 interface Props {
@@ -10,11 +10,12 @@ interface Props {
   size?: number;
 }
 
-/** Een trui in de kleur van het klassement, met rode bollen voor de bergtrui. */
+/** Een trui in de kleur van het klassement, met bollen voor de bergtrui. */
 export function JerseyIcon({ jersey, size = 52 }: Props) {
   const colors = useAppColors();
   const shirt = size * 0.62;
   const dot = size * 0.06;
+  const dotColor = POLKA_DOT_COLORS[jersey];
 
   return (
     <View
@@ -33,7 +34,7 @@ export function JerseyIcon({ jersey, size = 52 }: Props) {
         size={shirt}
         tintColor={JERSEY_COLORS[jersey]}
       />
-      {jersey === "white" || jersey === "polka" ? (
+      {jersey === "white" || dotColor ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <View style={styles.center}>
             <SymbolView
@@ -44,7 +45,7 @@ export function JerseyIcon({ jersey, size = 52 }: Props) {
           </View>
         </View>
       ) : null}
-      {jersey === "polka"
+      {dotColor
         ? POLKA_DOTS.map(([x, y], index) => (
             <View
               key={index}
@@ -56,7 +57,7 @@ export function JerseyIcon({ jersey, size = 52 }: Props) {
                   borderRadius: dot / 2,
                   left: size * x - dot / 2,
                   top: size * y - dot / 2,
-                  backgroundColor: POLKA_DOT_COLOR,
+                  backgroundColor: dotColor,
                 },
               ]}
             />

@@ -138,6 +138,84 @@ Seed: `npx convex run seedCycling:calendar2027` (klassiekers, monumenten en
 de Tour 2027; data en starttijden zijn schattingen) en
 `npx convex run seedCycling:testTour` (vijf testetappes, één per dag).
 
+### Poulegenoten, eigen wedstrijden en beeld (9 november 2026)
+
+**Catalogus = templates.** Een "template" voor Parijs-Roubaix 2027 of de
+Tour is gewoon het gedeelde evenement in de publieke catalogus: admins maken
+het één keer aan, elke poule kiest het, en voorspellingen en uitslagen zijn
+gedeeld (uitgangspunt 2). Reeksen (Monumenten, Grote rondes, …) blijven de
+manier om er meerdere in één tik te kiezen. De seed `seedCycling:calendar2027`
+bevat nu naast de klassiekers en de Tour ook de Giro en de Vuelta 2027, elk met
+hun eigen truien (`jerseyValidator`: roze/paars/blauw, rood/blauwe bollen).
+
+**Wat poulegenoten invulden.** Twee plekken, allebei met respect voor
+`settings.revealPredictions` ("na sluiting" of "altijd"):
+- Tik een lid in de stand of ledenlijst → `poules/[pouleId]/member/[userId]`:
+  per evenement elk onderdeel met zijn antwoord en punten; een nog open
+  onderdeel toont een slotje met de sluitingstijd (`predictions.forMemberInPoule`).
+- Onder elk voorspelscherm een kaart "Jouw poule(s)" met ieders antwoord en
+  punten (`predictions.forFixtureInMyPoules`); het voorspelscherm weet zelf niet
+  uit welke poule het geopend is, dus het toont alle poules met dit evenement.
+
+**Eigen wedstrijden in een poule.** Eigenaar en beheerders zien onder het
+programma "Wedstrijd toevoegen" (modal `add-event/`): kies uit de catalogus
+(`poules.addEvents`) of maak zelf een **wielerkoers** (naam, start, parcours,
+favorieten uit de rennerslijst, Nederlandse vragen aan/uit) of een
+**voetbalwedstrijd** (twee teams met code, aftrap, gelijkspel ja/nee). Dat zijn
+gewone evenementen met `visibility: "private"` en `ownerPouleId`
+(`convex/customEvents.ts`); de koers-opbouw deelt `lib/cyclingRace.ts` met de
+seed. De eigenaar voert zelf de uitslag in via de knop "Uitslagen" op het
+evenementscherm (`manage/[eventId]`, zelfde scherm als de beheerder); de
+status van zo'n evenement volgt vanzelf uit de uitslagen (upcoming → live →
+finished). Een platformbeheerder gebruikt dezelfde bouwer met `publish` om iets
+nieuws in de catalogus te zetten (Beheer → Nieuwe wedstrijd).
+
+**Meer kleur.** `events.meta` heeft `imageUrl` (foto), `logoUrl` en `color`;
+`athletes.imageUrl` en `participants.imageUrl` zijn de portretten en logo's. In
+productie vult een beheerder ze (straks via de webversie). Voor ontwikkeling
+zoekt `node scripts/fetch-commons-images.mjs` vrij gelicentieerde foto's op
+Wikimedia Commons (alleen Commons; logo's van organisatoren en clubs zijn
+beschermd en worden overgeslagen; bij echt gebruik is naamsvermelding nodig).
+Vlaggen komen rechtenvrij als emoji uit de landcode (`modules/nations.ts`,
+IOC/FIFA → ISO); een clubcode zonder vlag houdt zijn code.
+
+**Kop van een evenement (10 november 2026).** Zoals Apple Kaarten een plek
+toont, niet als gekleurde banner: de foto loopt onder de doorzichtige
+navigatiebalk door, rekt mee als je omlaag trekt en loopt onderaan over in de
+achtergrond; het beeldmerk (logo, of een gekleurd rondje met het sporticoon)
+staat gecentreerd op de rand, daaronder naam, soort en datum, en de tabs. De
+kop scrollt mee met de inhoud; zodra de naam onder de balk verdwijnt,
+verschijnt hij als titel in de balk (`EventHero`, `useEventScroll`). Elke tab
+is daarom één verticale lijst die de kop bovenaan toont; de etappes en
+speelrondes swipen horizontaal binnen die lijst.
+
+Vloeiende overgangen: wat in de navigatiebalk staat (titel, menu, doorzichtige
+balk) wordt vanaf de eerste render gezet of staat vast in de layout; een
+latere wijziging springt er na de overgang in en laat de terugknop knipperen.
+Lijsten geven de kop-gegevens mee (`eventPreview`, als parameter `preview`),
+zodat het evenementscherm zijn kop al tijdens het inschuiven toont. Bezochte
+tabs blijven bestaan; bij een wissel schuift eerst het segment door en komt de
+nieuwe tab op dezelfde hoogte in beeld (`tabSwitchOffset`). Afbeeldingen faden
+alleen de eerste keer in (`fadeInOnce`).
+
+De kop van een evenement wordt één keer getekend, als laag boven de tabs, en
+schuift mee met de lijst die in beeld is; tabs hebben bovenaan alleen ruimte
+van dezelfde hoogte. Zo bouwt een (eerste) tabwissel de kop niet opnieuw op.
+
+**Laden = skeleton, geen spinner.** Elk scherm toont tijdens het laden een
+skeleton in de vorm van zijn echte inhoud (`src/components/skeleton/`: poule,
+lid, poules, home, evenement, voorspellen, lijsten), dat rustig pulseert en
+stilstaat bij "Verminder beweging". Alleen opstarten en inloggen houden een
+spinner.
+
+**Logo's.** `node scripts/fetch-logos.mjs` zet logo's van koersen en
+competities en clubwapens in de dev-database: eerst vrije bestanden via
+Wikidata (P154, Commons), dan het Wikipedia-hoofdbeeld, dan TheSportsDB. In
+lijsten staat het logo op een witte tegel (`EventMark`), zonder logo de foto als
+miniatuur. Clubwapens staan in de teambadges. Logo's zijn merken: voor een
+release vervangt een beheerder ze door beeld met toestemming of via een
+datapartij.
+
 ### Invullen per soort evenement
 
 | Soort | Weergave | Invoer |
@@ -578,7 +656,8 @@ Clients krijgen de nieuwe stand via hun bestaande query-subscriptions.
 | Daarna | Voetbal-API | Importer-action per module (bijv. football-data.org of API-Football) die fixtures en uitslagen synchroniseert via een cron. |
 | Daarna | Schaatsen / multisport | Weinig bruikbare API's; handmatig of semi-automatisch (CSV-import). |
 | Daarna | Wielrennen | Startlijsten en uitslagen (bijv. ProCyclingStats) importeren, zodat elke renner kiesbaar is en "Andere renner" zelden nodig is. |
-| Later | Gebruikers | Eigen toernooien via templates; owner voert zelf uitslagen in. |
+| Nu (9 nov 2026) | Poule-eigenaren | Eigen koers of voetbalwedstrijd via "Wedstrijd toevoegen"; eigenaar voert zelf uitslagen in. Beheerders zetten via dezelfde bouwer wedstrijden in de catalogus. |
+| Later | Beheer-web | Banners, logo's en portretten invullen; grote toernooien bouwen zonder seed-script. |
 
 De importer-laag is bewust optioneel in het module-contract: een module werkt
 volledig met handmatige invoer.
@@ -657,6 +736,20 @@ volledig met handmatige invoer.
 8. **Alleen Nederlands**, geen vertaallaag. Teksten mogen direct in de
    componenten staan.
 
+**Genomen (9 november 2026)**
+
+9. **Templates zijn de gedeelde catalogus**, geen kopie per poule. Admins
+   maken echte wedstrijden één keer aan; een poule voegt ze toe.
+10. **Eigen wedstrijden eerst voor wielrennen én voetbal**: eendagskoers en
+    losse wedstrijd. Toernooi-templates (knock-out met 8) komen later.
+11. **Beeldmateriaal wordt later door beheerders gevuld** via een webversie;
+    de app toont de velden al. Vlaggen zijn emoji, geen afbeeldingen.
+
 **Nog open**
 
-- Geen. Nieuwe vragen komen hier terecht zodra ze opduiken tijdens het bouwen.
+- Android: de kaart "Jouw poule" ontbreekt nog in het volgorde-scherm op
+  Android (dat gebruikt het generieke Form); de rest van de types heeft hem.
+- Eigen voetbal: nu één wedstrijd per evenement; meerdere wedstrijden of een
+  mini-toernooi in één eigen evenement is een vervolgstap.
+- Speelrondes vul je inline in (cijferblok), zonder voorspelscherm; de kaart
+  "Jouw poule" staat daar dus niet. Via het ledenscherm zie je ze wel.

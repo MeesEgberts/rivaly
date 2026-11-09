@@ -60,7 +60,11 @@ export function BracketTeamRow({
         pressed && !isWinner && { backgroundColor: colors.fill },
       ]}
     >
-      <TeamBadge code={team.code} isOnAccent={isWinner} />
+      <TeamBadge
+        code={team.code}
+        imageUrl={team.imageUrl}
+        isOnAccent={isWinner}
+      />
       <Text
         numberOfLines={1}
         style={[

@@ -7,9 +7,18 @@ export const JERSEY_COLORS: Record<Jersey, string> = {
   green: "#1E9E52",
   polka: "#FFFFFF",
   white: "#FFFFFF",
+  pink: "#F2559B",
+  purple: "#7B3FA0",
+  blue: "#1F6FD1",
+  red: "#D6202B",
+  polkaBlue: "#FFFFFF",
 };
 
-export const POLKA_DOT_COLOR = "#E0262B";
+/** Kleur van de bollen op een bolletjestrui. */
+export const POLKA_DOT_COLORS: Partial<Record<Jersey, string>> = {
+  polka: "#E0262B",
+  polkaBlue: "#1F6FD1",
+};
 
 /** Podiumblokken: goud, zilver, brons. */
 export const PODIUM_COLORS: Record<number, string> = {

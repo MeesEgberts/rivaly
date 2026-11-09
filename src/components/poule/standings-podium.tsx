@@ -18,6 +18,7 @@ export function StandingsPodium({ rows }: Props) {
       id: row.userId,
       name: firstName(row.name),
       code: initials(row.name),
+      imageUrl: row.imageUrl,
     },
     hit: null,
   }));

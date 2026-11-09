@@ -8,6 +8,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
+import { eventPreview, type EventPreview } from "./lib/eventPreview";
 import {
   getMembership,
   requireMembership,
@@ -18,6 +19,7 @@ import {
   generateUniqueInviteCode,
   normalizeInviteCode,
 } from "./lib/inviteCode";
+import { deletePoule } from "./lib/deletePoule";
 import { recomputeStandings } from "./lib/standings";
 
 const MAX_EVENTS_PER_POULE = 20;
@@ -42,6 +44,10 @@ async function eventsForPoule(
     endsAt: number;
     presetKey: string;
     presetName: string;
+    logoUrl: string | null;
+    /** Door deze poule zelf aangemaakt; de eigenaar voert de uitslag in. */
+    isCustom: boolean;
+    preview: EventPreview;
   }[] = [];
 
   for (const link of links) {
@@ -64,7 +70,34 @@ async function eventsForPoule(
       endsAt: event.endsAt,
       presetKey: link.presetKey,
       presetName: preset.name,
+      logoUrl: event.meta.logoUrl ?? null,
+      isCustom: event.ownerPouleId === pouleId,
+      preview: eventPreview(event),
     });
+  }
+
+  return events.sort((a, b) => a.startsAt - b.startsAt);
+}
+
+/** Controleert dat catalogus-evenementen bestaan en kiesbaar zijn. */
+async function requireCatalogEvents(
+  ctx: QueryCtx | MutationCtx,
+  eventIds: Id<"events">[],
+  presetKey: string,
+): Promise<Doc<"events">[]> {
+  const events: Doc<"events">[] = [];
+
+  for (const eventId of new Set(eventIds)) {
+    const event = await ctx.db.get("events", eventId);
+
+    if (!event || event.visibility !== "public" || event.status === "draft") {
+      throw new ConvexError(
+        "Een van de gekozen evenementen is niet beschikbaar.",
+      );
+    }
+
+    getPreset(event.moduleKey, presetKey);
+    events.push(event);
   }
 
   return events;
@@ -97,20 +130,11 @@ export const create = mutation({
     }
 
     // Controleer alle evenementen vóór we iets wegschrijven.
-    const events: Doc<"events">[] = [];
-
-    for (const eventId of new Set(args.eventIds)) {
-      const event = await ctx.db.get("events", eventId);
-
-      if (!event || event.visibility !== "public" || event.status === "draft") {
-        throw new ConvexError(
-          "Een van de gekozen evenementen is niet beschikbaar.",
-        );
-      }
-
-      getPreset(event.moduleKey, args.presetKey);
-      events.push(event);
-    }
+    const events = await requireCatalogEvents(
+      ctx,
+      args.eventIds,
+      args.presetKey,
+    );
 
     const inviteCode = await generateUniqueInviteCode(ctx);
     const now = Date.now();
@@ -142,6 +166,53 @@ export const create = mutation({
     await recomputeStandings(ctx, pouleId);
 
     return { pouleId, inviteCode };
+  },
+});
+
+/** Catalogus-evenementen toevoegen aan een bestaande poule (eigenaar of beheerder). */
+export const addEvents = mutation({
+  args: {
+    pouleId: v.id("poules"),
+    eventIds: v.array(v.id("events")),
+    presetKey: v.string(),
+  },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    await requirePouleAdmin(ctx, args.pouleId, user._id);
+
+    if (args.eventIds.length === 0) {
+      throw new ConvexError("Kies minimaal één wedstrijd of toernooi.");
+    }
+
+    const events = await requireCatalogEvents(
+      ctx,
+      args.eventIds,
+      args.presetKey,
+    );
+
+    const links = await ctx.db
+      .query("pouleEvents")
+      .withIndex("by_poule", (q) => q.eq("pouleId", args.pouleId))
+      .take(MAX_EVENTS_PER_POULE);
+    const linked = new Set(links.map((link) => link.eventId));
+    const fresh = events.filter((event) => !linked.has(event._id));
+
+    if (links.length + fresh.length > MAX_EVENTS_PER_POULE) {
+      throw new ConvexError(
+        `Een poule kan maximaal ${MAX_EVENTS_PER_POULE} evenementen bevatten.`,
+      );
+    }
+
+    for (const event of fresh) {
+      await ctx.db.insert("pouleEvents", {
+        pouleId: args.pouleId,
+        eventId: event._id,
+        presetKey: args.presetKey,
+      });
+    }
+
+    return fresh.length;
   },
 });
 
@@ -448,6 +519,38 @@ export const leave = mutation({
     }
 
     await recomputeStandings(ctx, args.pouleId);
+
+    return null;
+  },
+});
+
+/**
+ * Verwijdert de poule. Alleen de eigenaar, en alleen zolang er nog geen
+ * andere deelnemers zijn: daarna is het ook hún poule.
+ */
+export const remove = mutation({
+  args: { pouleId: v.id("poules") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const membership = await requireMembership(ctx, args.pouleId, user._id);
+
+    if (membership.role !== "owner") {
+      throw new ConvexError("Alleen de eigenaar kan de poule verwijderen.");
+    }
+
+    const members = await ctx.db
+      .query("pouleMembers")
+      .withIndex("by_poule", (q) => q.eq("pouleId", args.pouleId))
+      .take(2);
+
+    if (members.length > 1) {
+      throw new ConvexError(
+        "Er doen al anderen mee. Je kunt de poule alleen verwijderen zolang je er alleen in zit.",
+      );
+    }
+
+    await deletePoule(ctx, args.pouleId);
 
     return null;
   },

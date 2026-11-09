@@ -1,9 +1,6 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { ScoreEntryScrollView } from "@/components/score-entry/score-entry-scroll-view";
-import { toEditableMatches } from "@/utils/match-rows";
-
 import { MatchdayDayCard } from "./matchday-day-card";
 import { MatchdaySummary } from "./matchday-summary";
 import { matchesByDay } from "@/utils/matchdays";
@@ -14,23 +11,23 @@ interface Props {
   width: number;
 }
 
-/** Eén speelronde als pagina in de swipebare lijst, met eigen cijferblok. */
+/**
+ * Eén speelronde als pagina in de swipebare rij. Scrollt niet zelf: de tab
+ * is één lijst met het cijferblok voor de ronde die in beeld is.
+ */
 export function MatchdayPage({ round, width }: Props) {
-  const editable = useMemo(() => toEditableMatches(round.matches), [round]);
   const days = useMemo(() => matchesByDay(round.matches), [round]);
 
   return (
-    <View style={{ width, flex: 1 }}>
-      <ScoreEntryScrollView matches={editable}>
-        <MatchdaySummary round={round} />
-        {days.map((day) => (
-          <MatchdayDayCard
-            key={day.key}
-            title={day.title}
-            matches={day.matches}
-          />
-        ))}
-      </ScoreEntryScrollView>
+    <View style={{ width }}>
+      <MatchdaySummary round={round} />
+      {days.map((day) => (
+        <MatchdayDayCard
+          key={day.key}
+          title={day.title}
+          matches={day.matches}
+        />
+      ))}
     </View>
   );
 }

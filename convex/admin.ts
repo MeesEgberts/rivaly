@@ -7,23 +7,19 @@ import {
   fixtureTypeKeyValidator,
 } from "../modules/validators";
 import { internal } from "./_generated/api";
-import { mutation, query } from "./_generated/server";
+import type { Doc, Id } from "./_generated/dataModel";
+import { mutation, query, type MutationCtx } from "./_generated/server";
+import { requireEventManager } from "./lib/access";
 import { assertAthletesInPool } from "./lib/athletes";
 import { requireAdmin } from "./lib/auth";
+import { uniqueSlug } from "./lib/slug";
+
+const MAX_FIXTURES = 500;
 
 /**
  * Beheerfuncties voor platformbeheerders (users.isAdmin). In fase 0 worden
  * evenementen en uitslagen hiermee handmatig ingevoerd; importers komen later.
  */
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 export const listEvents = query({
   args: {},
@@ -57,26 +53,10 @@ export const createEvent = mutation({
     const admin = await requireAdmin(ctx);
     getModule(args.moduleKey);
 
-    const baseSlug = slugify(args.name);
-    let slug = baseSlug;
-
-    for (let attempt = 2; attempt < 50; attempt += 1) {
-      const existing = await ctx.db
-        .query("events")
-        .withIndex("by_slug", (q) => q.eq("slug", slug))
-        .unique();
-
-      if (!existing) {
-        break;
-      }
-
-      slug = `${baseSlug}-${attempt}`;
-    }
-
     return await ctx.db.insert("events", {
       moduleKey: args.moduleKey,
       name: args.name.trim(),
-      slug,
+      slug: await uniqueSlug(ctx, args.name),
       startsAt: args.startsAt,
       endsAt: args.endsAt,
       status: "draft",
@@ -189,7 +169,8 @@ export const addFixture = mutation({
 
 /**
  * Voert een (tussen)uitslag in en start de herberekening van alle poules
- * met dit evenement. Een correctie is simpelweg opnieuw aanroepen.
+ * met dit evenement. Een correctie is simpelweg opnieuw aanroepen. Bij een
+ * eigen wedstrijd van een poule mag de poule-eigenaar dit ook.
  */
 export const setResult = mutation({
   args: {
@@ -199,12 +180,7 @@ export const setResult = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    const fixture = await ctx.db.get("fixtures", args.fixtureId);
-
-    if (!fixture) {
-      throw new ConvexError("Onderdeel niet gevonden.");
-    }
+    const { fixture, event } = await requireManagedFixture(ctx, args.fixtureId);
 
     assertResultFits(fixture.payload, args.result);
     await assertAthletesInPool(ctx, fixture.payload, args.result);
@@ -213,6 +189,8 @@ export const setResult = mutation({
       result: args.result,
       status: args.status,
     });
+
+    await syncOwnedEventStatus(ctx, event);
 
     await ctx.scheduler.runAfter(0, internal.scoring.recomputeFixture, {
       fixtureId: args.fixtureId,
@@ -229,12 +207,14 @@ export const setFixtureStatus = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { event } = await requireManagedFixture(ctx, args.fixtureId);
 
     await ctx.db.patch("fixtures", args.fixtureId, {
       status: args.status,
       result: undefined,
     });
+
+    await syncOwnedEventStatus(ctx, event);
 
     await ctx.scheduler.runAfter(0, internal.scoring.recomputeFixture, {
       fixtureId: args.fixtureId,
@@ -243,3 +223,57 @@ export const setFixtureStatus = mutation({
     return null;
   },
 });
+
+/** Het onderdeel met zijn evenement, mits de gebruiker dat mag beheren. */
+async function requireManagedFixture(
+  ctx: MutationCtx,
+  fixtureId: Id<"fixtures">,
+) {
+  const fixture = await ctx.db.get("fixtures", fixtureId);
+
+  if (!fixture) {
+    throw new ConvexError("Onderdeel niet gevonden.");
+  }
+
+  const event = await ctx.db.get("events", fixture.eventId);
+
+  if (!event) {
+    throw new ConvexError("Evenement niet gevonden.");
+  }
+
+  await requireEventManager(ctx, event);
+
+  return { fixture, event };
+}
+
+/**
+ * Een eigen wedstrijd van een poule heeft geen beheerder die de status
+ * bijhoudt: hij gaat "live" bij de eerste uitslag en "finished" zodra elk
+ * onderdeel een uitslag heeft of geannuleerd is.
+ */
+async function syncOwnedEventStatus(ctx: MutationCtx, event: Doc<"events">) {
+  if (!event.ownerPouleId) {
+    return;
+  }
+
+  const fixtures = await ctx.db
+    .query("fixtures")
+    .withIndex("by_event_and_order", (q) => q.eq("eventId", event._id))
+    .take(MAX_FIXTURES);
+
+  const settled = fixtures.filter(
+    (fixture) =>
+      fixture.status === "finished" || fixture.status === "cancelled",
+  );
+  const started = fixtures.some((fixture) => fixture.status !== "scheduled");
+
+  const status = !started
+    ? "upcoming"
+    : settled.length === fixtures.length
+      ? "finished"
+      : "live";
+
+  if (status !== event.status) {
+    await ctx.db.patch("events", event._id, { status });
+  }
+}

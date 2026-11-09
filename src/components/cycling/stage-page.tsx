@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import type { CyclingStage } from "@/utils/cycling";
 import type { ParticipantMap } from "@/utils/participants";
@@ -13,16 +13,15 @@ interface Props {
   now: number;
 }
 
-/** Eén etappe: parcours bovenaan, daaronder jouw podium en de uitslag. */
+/**
+ * Eén etappe als pagina in de swipebare rij: parcours, jouw podium en de
+ * uitslag. Scrollt niet zelf; de hele tab is één verticale lijst.
+ */
 export function StagePage({ stage, width, participants, now }: Props) {
   const { fixture } = stage;
 
   return (
-    <ScrollView
-      style={{ width }}
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={styles.content}
-    >
+    <View style={[styles.content, { width }]}>
       <CourseCard
         caption={`Etappe ${stage.number}`}
         fallbackTitle={`Etappe ${stage.number}`}
@@ -37,10 +36,10 @@ export function StagePage({ stage, width, participants, now }: Props) {
         status={stage.status}
         participants={participants}
       />
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 16, paddingBottom: 120 },
+  content: { padding: 16, gap: 16 },
 });

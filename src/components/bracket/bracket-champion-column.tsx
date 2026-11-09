@@ -50,7 +50,7 @@ export function BracketChampionColumn({
           <Text style={styles.trophy}>🏆</Text>
           {team ? (
             <View style={styles.team}>
-              <TeamBadge code={team.code} isOnAccent />
+              <TeamBadge code={team.code} imageUrl={team.imageUrl} isOnAccent />
               <Text
                 numberOfLines={1}
                 style={[styles.name, { color: colors.onAccent }]}

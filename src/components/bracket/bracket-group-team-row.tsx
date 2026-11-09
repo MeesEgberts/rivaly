@@ -25,7 +25,7 @@ export function BracketGroupTeamRow({ team, isDraggable }: Props) {
           : team?.name
       }
     >
-      <TeamBadge code={team?.code ?? "?"} />
+      <TeamBadge code={team?.code ?? "?"} imageUrl={team?.imageUrl} />
       <Text numberOfLines={1} style={[styles.name, { color: colors.label }]}>
         {team?.name ?? "Onbekend"}
       </Text>

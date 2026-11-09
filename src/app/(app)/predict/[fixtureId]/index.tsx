@@ -4,7 +4,8 @@ import { Redirect, useLocalSearchParams } from "expo-router";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { AthletePredictView } from "@/components/athletes/athlete-predict-view";
-import { LoadingScreen } from "@/components/loading-screen";
+import { PredictSkeleton } from "@/components/skeleton/predict-skeleton";
+import { ModalToolbar } from "@/components/ui/modal-toolbar";
 import { NumericPredictView } from "@/components/predict/numeric-predict-view";
 import { PickPredictView } from "@/components/predict/pick-predict-view";
 import { RankingPredictView } from "@/components/predict/ranking-predict-view";
@@ -16,8 +17,15 @@ export default function PredictScreen() {
   const { fixtureId } = useLocalSearchParams<{ fixtureId: Id<"fixtures"> }>();
   const fixture = useQuery(api.events.fixture, { fixtureId });
 
+  // De knoppen staan er al tijdens het openen; anders schuiven ze er pas
+  // later in, als de modal al omhoog is gekomen.
   if (fixture === undefined) {
-    return <LoadingScreen />;
+    return (
+      <>
+        <ModalToolbar onConfirm={() => {}} isConfirmDisabled />
+        <PredictSkeleton />
+      </>
+    );
   }
 
   // Kiezen uit alle atleten van een sport: één weergave voor keuze en volgorde.

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { TeamBadge } from "@/components/match/team-badge";
+import { AthleteAvatar } from "@/components/athletes/athlete-avatar";
 import { HIT_COLORS, PODIUM_COLORS } from "@/constants/cycling-colors";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { PodiumSlot } from "@/utils/cycling";
@@ -23,7 +23,12 @@ export function PodiumStep({ slot }: Props) {
       <View style={styles.rider}>
         {slot.rider ? (
           <>
-            {slot.rider.code ? <TeamBadge code={slot.rider.code} /> : null}
+            <AthleteAvatar
+              name={slot.rider.name}
+              imageUrl={slot.rider.imageUrl}
+              code={slot.rider.code}
+              size={38}
+            />
             <Text
               numberOfLines={1}
               style={[
@@ -74,15 +79,15 @@ const styles = StyleSheet.create({
   name: { fontSize: 14, fontWeight: "600", textAlign: "center" },
   strike: { textDecorationLine: "line-through" },
   empty: {
-    width: 34,
-    height: 22,
-    borderRadius: 5,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyMark: { fontSize: 12, fontWeight: "700" },
+  emptyMark: { fontSize: 16, fontWeight: "700" },
   hit: { fontSize: 11, fontWeight: "700" },
   block: {
     borderTopLeftRadius: 10,

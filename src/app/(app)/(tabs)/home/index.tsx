@@ -8,7 +8,8 @@ import { AllDoneCard } from "@/components/home/all-done-card";
 import { ClosingSoonSection } from "@/components/home/closing-soon-section";
 import { EventProgressCard } from "@/components/home/event-progress-card";
 import { NextDeadlineCard } from "@/components/home/next-deadline-card";
-import { LoadingScreen } from "@/components/loading-screen";
+import { HomeSkeleton } from "@/components/skeleton/home-skeleton";
+import { SkeletonScreen } from "@/components/skeleton/skeleton-screen";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Screen, Section } from "@/components/ui/screen";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -30,7 +31,11 @@ export default function HomeScreen() {
   const todo = useMemo(() => todoItems(items ?? []), [items]);
 
   if (events === undefined || items === undefined) {
-    return <LoadingScreen />;
+    return (
+      <SkeletonScreen>
+        <HomeSkeleton />
+      </SkeletonScreen>
+    );
   }
 
   if (events.length === 0) {

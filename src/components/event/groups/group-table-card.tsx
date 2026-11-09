@@ -97,7 +97,10 @@ export function GroupTableCard({ name, matches, qualifiers }: Props) {
               {index + 1}
             </Text>
             <View style={styles.teamCell}>
-              <TeamBadge code={table.info(row.teamId).code} />
+              <TeamBadge
+                code={table.info(row.teamId).code}
+                imageUrl={table.info(row.teamId).imageUrl}
+              />
               <Text
                 numberOfLines={1}
                 style={[styles.teamName, { color: colors.label }]}

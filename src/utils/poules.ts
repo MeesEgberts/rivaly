@@ -7,6 +7,11 @@ export type StandingRow = FunctionReturnType<
   typeof api.poules.standings
 >[number];
 
+/** "🏆 Kantoorpoule": emoji en naam, voor in de navigatiebalk. */
+export function pouleTitle(poule: { name: string; emoji: string | null }) {
+  return [poule.emoji, poule.name].filter(Boolean).join(" ");
+}
+
 /** "4 leden · 3 evenementen" */
 export function pouleSummary(memberCount: number, eventCount: number): string {
   const members = memberCount === 1 ? "1 lid" : `${memberCount} leden`;

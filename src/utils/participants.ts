@@ -4,6 +4,8 @@ export interface ParticipantInfo {
   shortName: string;
   /** Korte code voor badges, bijv. "NED". */
   code: string;
+  /** Logo of portret, als een beheerder dat heeft ingevuld. */
+  imageUrl: string | null;
 }
 
 export type ParticipantMap = Map<string, ParticipantInfo>;
@@ -13,12 +15,14 @@ interface ParticipantSource {
   name: string;
   shortName?: string | null;
   code: string | null;
+  imageUrl?: string | null;
 }
 
 export const UNKNOWN_PARTICIPANT: ParticipantInfo = {
   name: "Onbekend",
   shortName: "Onbekend",
   code: "?",
+  imageUrl: null,
 };
 
 export function buildParticipantMap(
@@ -31,6 +35,7 @@ export function buildParticipantMap(
         name: participant.name,
         shortName: participant.shortName ?? participant.name,
         code: participant.code ?? participant.name.slice(0, 3).toUpperCase(),
+        imageUrl: participant.imageUrl ?? null,
       },
     ]),
   );

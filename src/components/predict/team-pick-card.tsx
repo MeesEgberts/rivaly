@@ -7,12 +7,20 @@ interface Props {
   label: string;
   /** Landcode voor de badge; zonder code (bijv. een speler) alleen de naam. */
   code: string | null;
+  /** Clubwapen, als dat er is. */
+  imageUrl?: string | null;
   isSelected: boolean;
   onPress?: () => void;
 }
 
 /** Eén keuze als kaart, zoals een team in de bracket. */
-export function TeamPickCard({ label, code, isSelected, onPress }: Props) {
+export function TeamPickCard({
+  label,
+  code,
+  imageUrl,
+  isSelected,
+  onPress,
+}: Props) {
   const colors = useAppColors();
 
   return (
@@ -30,7 +38,9 @@ export function TeamPickCard({ label, code, isSelected, onPress }: Props) {
         },
       ]}
     >
-      {code ? <TeamBadge code={code} isOnAccent={isSelected} /> : null}
+      {code ? (
+        <TeamBadge code={code} imageUrl={imageUrl} isOnAccent={isSelected} />
+      ) : null}
       <Text
         numberOfLines={1}
         style={[

@@ -65,7 +65,7 @@ export async function athletesAsParticipants(
     name: string;
     shortName: string;
     code: string;
-    imageUrl: null;
+    imageUrl: string | null;
     groupKey: null;
   }[]
 > {
@@ -81,7 +81,7 @@ export async function athletesAsParticipants(
         name: athlete.name,
         shortName: athlete.shortName,
         code: athlete.nation,
-        imageUrl: null,
+        imageUrl: athlete.imageUrl ?? null,
         groupKey: null,
       });
     }

@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import {
+  Animated,
   FlatList,
   StyleSheet,
-  View,
   useWindowDimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -13,6 +13,7 @@ import { cyclingStageKinds } from "@modules/cycling/module";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useEventData } from "@/hooks/use-event-data";
+import { useEventScroll } from "@/hooks/use-event-scroll";
 import { useNow } from "@/hooks/use-now";
 import {
   defaultStageIndex,
@@ -30,14 +31,16 @@ interface Props {
 }
 
 /**
- * Etappes van een ronde: strip met alle ritten bovenaan, daaronder per
- * etappe een pagina waar je horizontaal doorheen swipet.
+ * Etappes van een ronde: onder de kop een strip met alle ritten, daaronder
+ * per etappe een pagina waar je horizontaal doorheen swipet. Alles staat in
+ * één verticale lijst, zodat de kop meescrollt.
  */
 export function StagesTab({ eventId }: Props) {
   const colors = useAppColors();
   const now = useNow();
   const { width } = useWindowDimensions();
   const { event, fixtures, participants, isLoading } = useEventData(eventId);
+  const { header, scrollRef, scrollProps } = useEventScroll();
   const pagerRef = useRef<FlatList<CyclingStage>>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -77,7 +80,13 @@ export function StagesTab({ eventId }: Props) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Animated.ScrollView
+      ref={scrollRef}
+      {...scrollProps}
+      style={{ backgroundColor: colors.background }}
+      contentContainerStyle={styles.scroll}
+    >
+      {header}
       <StageStrip
         stages={stages}
         selectedIndex={index}
@@ -107,10 +116,10 @@ export function StagesTab({ eventId }: Props) {
           />
         )}
       />
-    </View>
+    </Animated.ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  scroll: { paddingBottom: 120 },
 });

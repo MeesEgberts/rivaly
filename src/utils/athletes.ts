@@ -90,13 +90,14 @@ export function athleteInfo(
       name: participant.name,
       shortName: participant.shortName,
       code: participant.code,
+      imageUrl: participant.imageUrl,
     };
   }
 
   const label =
     payload.options.find((option) => option.id === id)?.label ?? "Onbekend";
 
-  return { id, name: label, shortName: label, code: null };
+  return { id, name: label, shortName: label, code: null, imageUrl: null };
 }
 
 export function isOther(id: string): boolean {

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 
 import type { Id } from "@convex/_generated/dataModel";
 import { footballStageKinds } from "@modules/football/module";
@@ -12,6 +12,7 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { TROPHY_COLOR } from "@/constants/result-colors";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useEventData } from "@/hooks/use-event-data";
+import { useEventScroll } from "@/hooks/use-event-scroll";
 import { useNow } from "@/hooks/use-now";
 import { isFixtureOpen } from "@/utils/match-rows";
 import {
@@ -34,6 +35,7 @@ export function BonusTab({ eventId }: Props) {
   const colors = useAppColors();
   const now = useNow();
   const { event, fixtures, participants, isLoading } = useEventData(eventId);
+  const { header, scrollRef, scrollProps } = useEventScroll();
 
   const questions = useMemo(() => {
     if (!event || !fixtures) {
@@ -59,65 +61,70 @@ export function BonusTab({ eventId }: Props) {
   const locksAt = Math.min(...questions.map((fixture) => fixture.locksAt));
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="never"
+    <Animated.ScrollView
+      ref={scrollRef}
+      {...scrollProps}
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.scroll}
     >
-      <DeadlineCard
-        locksAt={locksAt}
-        now={now}
-        answered={answeredCount(questions)}
-        total={questions.length}
-      />
+      {header}
+      <View style={styles.content}>
+        <DeadlineCard
+          locksAt={locksAt}
+          now={now}
+          answered={answeredCount(questions)}
+          total={questions.length}
+        />
 
-      {tiles.length > 0 ? (
-        <>
-          <SectionTitle>Bonusvragen</SectionTitle>
-          <View style={styles.grid}>
-            {tiles.map((fixture) => {
-              const icon = questionIcon(fixture, participants);
+        {tiles.length > 0 ? (
+          <>
+            <SectionTitle>Bonusvragen</SectionTitle>
+            <View style={styles.grid}>
+              {tiles.map((fixture) => {
+                const icon = questionIcon(fixture, participants);
 
-              return (
-                <PredictionTile
-                  key={fixture._id}
-                  fixture={fixture}
-                  visual={
-                    <SymbolBadge
-                      name={icon}
-                      tint={iconTint(icon, TROPHY_COLOR)}
-                    />
-                  }
-                  title={fixture.label ?? "Vraag"}
-                  subtitle={questionSize(fixture) ?? undefined}
-                  participants={participants}
-                  isOpen={isFixtureOpen(fixture, now)}
-                />
-              );
-            })}
-          </View>
-        </>
-      ) : null}
+                return (
+                  <PredictionTile
+                    key={fixture._id}
+                    fixture={fixture}
+                    visual={
+                      <SymbolBadge
+                        name={icon}
+                        tint={iconTint(icon, TROPHY_COLOR)}
+                      />
+                    }
+                    title={fixture.label ?? "Vraag"}
+                    subtitle={questionSize(fixture) ?? undefined}
+                    participants={participants}
+                    isOpen={isFixtureOpen(fixture, now)}
+                  />
+                );
+              })}
+            </View>
+          </>
+        ) : null}
 
-      {others.length > 0 ? (
-        <>
-          <SectionTitle>Aantallen</SectionTitle>
-          {others.map((fixture) => (
-            <QuestionCard
-              key={fixture._id}
-              fixture={fixture}
-              icon={questionIcon(fixture, participants)}
-              participants={participants}
-              isOpen={isFixtureOpen(fixture, now)}
-            />
-          ))}
-        </>
-      ) : null}
-    </ScrollView>
+        {others.length > 0 ? (
+          <>
+            <SectionTitle>Aantallen</SectionTitle>
+            {others.map((fixture) => (
+              <QuestionCard
+                key={fixture._id}
+                fixture={fixture}
+                icon={questionIcon(fixture, participants)}
+                participants={participants}
+                isOpen={isFixtureOpen(fixture, now)}
+              />
+            ))}
+          </>
+        ) : null}
+      </View>
+    </Animated.ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 12, paddingBottom: 120 },
+  scroll: { paddingBottom: 120 },
+  content: { padding: 16, gap: 12 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
 });

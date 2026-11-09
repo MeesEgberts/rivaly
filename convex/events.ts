@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values";
 
 import { getModule } from "../modules/registry";
 import { query } from "./_generated/server";
-import { assertCanViewEvent } from "./lib/access";
+import { assertCanViewEvent, canManageEvent } from "./lib/access";
 import { athleteIdsOf, athletesAsParticipants } from "./lib/athletes";
 import { requireUser } from "./lib/auth";
 
@@ -40,6 +40,8 @@ export const catalog = query({
           _id: event._id,
           name: event.name,
           shortName: event.meta.shortName ?? null,
+          logoUrl: event.meta.logoUrl ?? null,
+          imageUrl: event.meta.imageUrl ?? null,
           moduleKey: event.moduleKey,
           moduleName: module.name,
           moduleIcon: module.icon,
@@ -124,6 +126,13 @@ export const get = query({
       status: event.status,
       startsAt: event.startsAt,
       endsAt: event.endsAt,
+      imageUrl: event.meta.imageUrl ?? null,
+      logoUrl: event.meta.logoUrl ?? null,
+      color: event.meta.color ?? null,
+      /** Eigen wedstrijd van een poule, niet uit de catalogus. */
+      ownerPouleId: event.ownerPouleId ?? null,
+      /** Mag deze gebruiker uitslagen invoeren? */
+      canManage: await canManageEvent(ctx, event, user),
       // Reeksen in de volgorde van de module, dus de belangrijkste eerst.
       seriesNames: (module.series ?? [])
         .filter((series) => event.meta.series?.includes(series.key))
@@ -253,6 +262,7 @@ export const fixture = query({
           name: participant.name,
           shortName: participant.shortName ?? null,
           code: participant.code ?? null,
+          imageUrl: participant.imageUrl ?? null,
         })),
         ...(await athletesAsParticipants(
           ctx,

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { Animated, StyleSheet, Text } from "react-native";
 
 import {
   championOf,
@@ -13,6 +13,7 @@ import { BracketSummary } from "@/components/bracket/bracket-summary";
 import { defaultGroupOrders, groupQualifiers } from "@/utils/bracket-groups";
 import { useBracketDraft } from "@/hooks/use-bracket-draft";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useEventScroll } from "@/hooks/use-event-scroll";
 import type { EventFixture } from "@/hooks/use-event-data";
 import { useNow } from "@/hooks/use-now";
 import { isFixtureOpen } from "@/utils/match-rows";
@@ -31,6 +32,7 @@ interface Props {
  */
 export function BracketEditor({ fixture, fixtures, participants }: Props) {
   const colors = useAppColors();
+  const { header, scrollRef, scrollProps } = useEventScroll();
   const now = useNow();
 
   const payload = fixture.payload.type === "bracket" ? fixture.payload : null;
@@ -73,11 +75,13 @@ export function BracketEditor({ fixture, fixtures, participants }: Props) {
   const championName = participantInfo(participants, champion)?.name ?? null;
 
   return (
-    <ScrollView
+    <Animated.ScrollView
+      ref={scrollRef}
+      {...scrollProps}
       style={{ backgroundColor: colors.background }}
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.scroll}
     >
+      {header}
       <BracketSummary
         picked={bracket.draft.winners.length}
         total={total}
@@ -123,12 +127,12 @@ export function BracketEditor({ fixture, fixtures, participants }: Props) {
           }
         />
       ))}
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingBottom: 48 },
+  scroll: { paddingBottom: 48 },
   hint: {
     fontSize: 13,
     lineHeight: 18,

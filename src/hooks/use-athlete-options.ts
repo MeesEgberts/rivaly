@@ -35,6 +35,7 @@ export function useAthleteOptions({ pool, favourites, search, chosen }: Args) {
             name: athlete.name,
             shortName: athlete.shortName,
             code: athlete.nation,
+            imageUrl: athlete.imageUrl,
           }));
 
     return source.filter((athlete) => !chosen.includes(athlete.id));

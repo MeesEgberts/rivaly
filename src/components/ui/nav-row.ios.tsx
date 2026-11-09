@@ -1,4 +1,12 @@
-import { Button, HStack, Image, Spacer, Text, VStack } from "@expo/ui/swift-ui";
+import {
+  Button,
+  HStack,
+  Image,
+  RNHostView,
+  Spacer,
+  Text,
+  VStack,
+} from "@expo/ui/swift-ui";
 import {
   buttonStyle,
   contentShape,
@@ -27,19 +35,24 @@ export function NavRow({
   icon,
   value,
   leadingText,
+  leading,
   onPress,
   highlighted,
   selected,
 }: NavRowProps) {
   const row = (
     <HStack spacing={12} modifiers={[contentShape(shapes.rectangle())]}>
-      {icon ? (
+      {leading ? (
+        <HStack modifiers={[frame({ width: 32, height: 32 })]}>
+          <RNHostView matchContents>{leading}</RNHostView>
+        </HStack>
+      ) : icon ? (
         <Image
           systemName={icon}
           modifiers={[foregroundStyle(iosColors.accent), frame({ width: 28 })]}
         />
       ) : null}
-      {leadingText ? (
+      {leadingText && !leading ? (
         <Text modifiers={[font({ textStyle: "title2" }), frame({ width: 28 })]}>
           {leadingText}
         </Text>

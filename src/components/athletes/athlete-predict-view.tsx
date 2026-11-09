@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet } from "react-native";
 
 import { PredictHeaderCard } from "@/components/predict/predict-header-card";
 import { PredictLockedCard } from "@/components/predict/predict-locked-card";
+import { PoulePredictionsCard } from "@/components/predict/poule-predictions-card";
 import { ModalToolbar } from "@/components/ui/modal-toolbar";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAthleteDraft } from "@/hooks/use-athlete-draft";
@@ -56,6 +57,7 @@ export function AthletePredictView({ fixture }: Props) {
         ) : (
           <PredictLockedCard fixture={fixture} />
         )}
+        <PoulePredictionsCard fixture={fixture} />
       </ScrollView>
     </>
   );

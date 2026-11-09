@@ -46,6 +46,7 @@ export function rankingOptionTeam(
     name: label,
     shortName: label,
     code: label.slice(0, 3).toUpperCase(),
+    imageUrl: null,
   };
 }
 

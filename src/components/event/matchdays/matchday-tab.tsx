@@ -14,8 +14,9 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useEventData } from "@/hooks/use-event-data";
 import { useNow } from "@/hooks/use-now";
+import { ScoreEntryScrollView } from "@/components/score-entry/score-entry-scroll-view";
 import { tapFeedback } from "@/utils/haptics";
-import { toMatchRows } from "@/utils/match-rows";
+import { toEditableMatches, toMatchRows } from "@/utils/match-rows";
 
 import { defaultMatchdayIndex } from "@/utils/matchdays";
 import { MatchdayPage } from "./matchday-page";
@@ -27,8 +28,9 @@ interface Props {
 }
 
 /**
- * Competitie: een strip met alle speelrondes bovenaan, en de rondes zelf als
- * pagina's waar je horizontaal doorheen swipet.
+ * Competitie: onder de kop een strip met alle speelrondes, en de rondes zelf
+ * als pagina's waar je horizontaal doorheen swipet. Het cijferblok loopt
+ * door de wedstrijden van de ronde die in beeld is.
  */
 export function MatchdayTab({ eventId }: Props) {
   const colors = useAppColors();
@@ -59,6 +61,11 @@ export function MatchdayTab({ eventId }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const index = selectedIndex ?? defaultMatchdayIndex(rounds);
 
+  const editable = useMemo(
+    () => toEditableMatches(rounds[index]?.matches ?? []),
+    [rounds, index],
+  );
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -82,13 +89,20 @@ export function MatchdayTab({ eventId }: Props) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <MatchdayStrip
-        rounds={rounds}
-        selectedIndex={index}
-        onSelect={selectRound}
-      />
-      <View style={[styles.divider, { backgroundColor: colors.separator }]} />
+    <ScoreEntryScrollView matches={editable}>
+      {/* Eén speelronde (bijv. een losse eigen wedstrijd): geen strip nodig. */}
+      {rounds.length > 1 ? (
+        <>
+          <MatchdayStrip
+            rounds={rounds}
+            selectedIndex={index}
+            onSelect={selectRound}
+          />
+          <View
+            style={[styles.divider, { backgroundColor: colors.separator }]}
+          />
+        </>
+      ) : null}
       <FlatList
         ref={pagerRef}
         data={rounds}
@@ -106,11 +120,10 @@ export function MatchdayTab({ eventId }: Props) {
         windowSize={3}
         renderItem={({ item }) => <MatchdayPage round={item} width={width} />}
       />
-    </View>
+    </ScoreEntryScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   divider: { height: StyleSheet.hairlineWidth },
 });

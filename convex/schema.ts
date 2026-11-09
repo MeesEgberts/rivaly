@@ -69,7 +69,11 @@ export default defineSchema({
     createdBy: v.id("users"),
     meta: v.object({
       shortName: v.optional(v.string()),
+      /** Banner bovenaan het evenementscherm (breed beeld). */
       imageUrl: v.optional(v.string()),
+      /** Logo van de wedstrijd of competitie, vierkant. */
+      logoUrl: v.optional(v.string()),
+      /** Themakleur (hex) als er geen banner is. */
       color: v.optional(v.string()),
       /** Reeksen uit de module, bijv. "monuments", om in één keer te kiezen. */
       series: v.optional(v.array(v.string())),
@@ -99,6 +103,8 @@ export default defineSchema({
     nation: v.string(),
     /** Naam en land zonder accenten, voor de zoekindex. */
     searchText: v.string(),
+    /** Portretfoto; wordt later door een beheerder gevuld. */
+    imageUrl: v.optional(v.string()),
   })
     .index("by_sport_and_name", ["sport", "name"])
     .searchIndex("search_text", {

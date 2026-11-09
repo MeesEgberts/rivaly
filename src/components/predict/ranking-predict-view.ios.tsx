@@ -34,6 +34,7 @@ import {
 } from "@/utils/ranking";
 import { PredictHeaderCard } from "./predict-header-card";
 import { PredictLockedCard } from "./predict-locked-card";
+import { PoulePredictionsCard } from "./poule-predictions-card";
 import { describeContext } from "@/utils/fixture-text";
 import type { RankingPredictViewProps } from "./ranking-predict-view";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
@@ -81,6 +82,7 @@ export function RankingPredictView({ fixture }: RankingPredictViewProps) {
             fallbackTitle="Volgorde"
           />
           <PredictLockedCard fixture={fixture} />
+          <PoulePredictionsCard fixture={fixture} />
         </ScrollView>
       </>
     );

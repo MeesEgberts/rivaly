@@ -14,12 +14,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
-import { TeamBadge } from "@/components/match/team-badge";
 import { medalColor } from "@/constants/medal-colors";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { AthleteInfo } from "@/types/athlete";
 import { stepHeight } from "@/utils/athletes";
 import { tapFeedback } from "@/utils/haptics";
+
+import { AthleteAvatar } from "./athlete-avatar";
 
 interface Props {
   /** Plek op het podium, 0 = plek 1. */
@@ -139,7 +140,12 @@ export function PodiumSlot({
                 },
               ]}
             >
-              {athlete.code ? <TeamBadge code={athlete.code} /> : null}
+              <AthleteAvatar
+                name={athlete.name}
+                imageUrl={athlete.imageUrl}
+                code={athlete.code}
+                size={isCompact ? 30 : 40}
+              />
               <Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -215,7 +221,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 14, fontWeight: "700", textAlign: "center" },
   compactName: { fontSize: 11 },
   empty: {
-    height: 62,
+    height: 78,
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
