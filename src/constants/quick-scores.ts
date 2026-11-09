@@ -1,0 +1,13 @@
+/** De uitslagen die in het voetbal het vaakst voorkomen. */
+export const QUICK_SCORES: [number, number][] = [
+  [1, 0],
+  [2, 1],
+  [2, 0],
+  [1, 1],
+  [0, 0],
+  [2, 2],
+  [0, 1],
+  [1, 2],
+  [0, 2],
+  [3, 1],
+];

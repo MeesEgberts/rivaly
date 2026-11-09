@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "rivaly",
+    "name": "Rivaly",
     "slug": "rivaly",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,9 @@
     "scheme": "rivaly",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "nl.beyondweb.rivaly",
+      "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {
@@ -17,11 +19,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "server",
-      "favicon": "./assets/images/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "package": "nl.beyondweb.rivaly"
     },
     "plugins": [
       "expo-router",
@@ -32,22 +31,23 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "@clerk/expo",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
     "extra": {
-      "router": {
-        "asyncRoutes": {
-          "web": true
-        }
-      },
       "eas": {
         "projectId": "022e1720-d333-4473-87cd-c9b922118d88"
       }
     },
-    "owner": "beyondwebsolutions"
+    "owner": "beyondwebsolutions",
+    "platforms": [
+      "ios",
+      "android"
+    ]
   }
 }
