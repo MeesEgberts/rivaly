@@ -2,13 +2,13 @@ import { Stack } from "expo-router";
 
 import { AvatarButton } from "@/components/ui/avatar-button";
 
-export default function ProfileLayout() {
+export default function SettingsLayout() {
   return (
     <Stack>
       <Stack.Screen
         name="index"
         options={{
-          title: "Profiel",
+          title: "Instellingen",
           headerLargeTitle: true,
           headerRight: () => <AvatarButton />,
         }}

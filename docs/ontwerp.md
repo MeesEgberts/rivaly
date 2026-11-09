@@ -459,7 +459,7 @@ src/app/
         settings.tsx
         events/[eventId].tsx    # EventOverview van de module (bracket, tabellen, podiums)
     predict/[fixtureId].tsx     # voorspelformulier (modal, swipe door de reeks)
-    profile.tsx
+    settings/                   # instellingen: app-versie, later taal; account via de avatar
   j/[code].tsx                  # deep link vanuit de uitnodiging → preview + Meedoen
   admin/                        # alleen platformbeheerders: evenementen, uitslagen invoeren
 ```

@@ -1,16 +1,18 @@
-import { useClerk } from "@clerk/expo";
 import { useQuery } from "convex/react";
 import { router } from "expo-router";
 
 import { api } from "@convex/_generated/api";
 import { LoadingScreen } from "@/components/loading-screen";
-import { DestructiveRow } from "@/components/ui/destructive-row";
 import { NavRow } from "@/components/ui/nav-row";
 import { Screen, Section } from "@/components/ui/screen";
+import { appVersion } from "@/utils/app-version";
 
-export default function ProfileScreen() {
+/**
+ * Instellingen-tab. Het account (naam, foto, uitloggen) zit achter de
+ * avatar rechtsboven; hier komen app-voorkeuren zoals later taal en meldingen.
+ */
+export default function SettingsScreen() {
   const me = useQuery(api.users.me);
-  const { signOut } = useClerk();
 
   if (me === undefined) {
     return <LoadingScreen />;
@@ -24,13 +26,13 @@ export default function ProfileScreen() {
             icon="wrench.and.screwdriver"
             title="Beheer"
             subtitle="Evenementen en uitslagen"
-            onPress={() => router.push("/profile/admin")}
+            onPress={() => router.push("/settings/admin")}
           />
         </Section>
       ) : null}
 
-      <Section>
-        <DestructiveRow title="Uitloggen" onPress={() => signOut()} />
+      <Section title="Over Rivaly">
+        <NavRow icon="info.circle" title="Versie" value={appVersion()} />
       </Section>
     </Screen>
   );

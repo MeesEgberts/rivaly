@@ -5,15 +5,15 @@ export default function TabsLayout() {
     <NativeTabs>
       <NativeTabs.Trigger name="home">
         <NativeTabs.Trigger.Label>Voorspellen</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="sportscourt" md="sports_soccer" />
+        <NativeTabs.Trigger.Icon sf="target" md="target" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="poules">
         <NativeTabs.Trigger.Label>Poules</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="trophy" md="emoji_events" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profiel</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="person.crop.circle" md="account_circle" />
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Label>Instellingen</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
