@@ -91,6 +91,12 @@ export const fixtureDetailsValidator = v.object({
   jersey: v.optional(jerseyValidator),
   /** SF Symbol voor op de kaart, bijv. "trophy.fill" bij "Wie wordt kampioen?". */
   icon: v.optional(v.string()),
+  /** Schaatsen: de afstand in meters, bijv. 500. */
+  distanceM: v.optional(v.number()),
+  /** Schaatsen: "massstart" of "relay" als het geen gewone rit is. */
+  format: v.optional(v.string()),
+  /** Schaatsen: mannen, vrouwen of een aflossing (zie `SKATING_CATEGORIES`). */
+  category: v.optional(v.string()),
 });
 
 export type FixtureDetails = Infer<typeof fixtureDetailsValidator>;

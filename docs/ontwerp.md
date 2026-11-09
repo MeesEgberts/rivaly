@@ -216,6 +216,27 @@ miniatuur. Clubwapens staan in de teambadges. Logo's zijn merken: voor een
 release vervangt een beheerder ze door beeld met toestemming of via een
 datapartij.
 
+### Schaatsen en shorttrack (modules `speedskating` en `shorttrack`, 10 november 2026)
+
+Twee modules met dezelfde opbouw en dezelfde puntentelling (sleutels
+`classic` en `allOrNothing`, zodat ze met voetbal en wielrennen in één poule
+passen). Een toernooi heeft de fases *Afstanden* (per afstand een podium,
+`ranking` met size 3) en *Extra* (aantal (gouden) medailles voor Nederland).
+
+- **Categorie** (`modules/skating/categories.ts`): mannen, vrouwen of een
+  aflossing (mannen, vrouwen, gemengd). Atleten hebben een `category`, de
+  zoekindex filtert erop en een pool kan `category` hebben. Zo vind je bij de
+  500 m vrouwen alleen vrouwen, en bij een aflossing alleen landenploegen.
+- **Afstand** staat in `fixtures.details` (`distanceM`, `format`
+  `massstart`/`relay`, `category`).
+- **Weergave:** tab *Afstanden* met een strip (meters en ♀/♂/⚥) en per
+  afstand een swipebare pagina met kop ("500 m · Vrouwen") en hetzelfde
+  podium als bij wielrennen.
+
+Seed: `npx convex run seedSkating:championships2027` (WK Afstanden en WK
+Shorttrack 2027, data en deelnemers geschat) en
+`npx convex run seedSkating:testSpeedskating`.
+
 ### Invullen per soort evenement
 
 | Soort | Weergave | Invoer |

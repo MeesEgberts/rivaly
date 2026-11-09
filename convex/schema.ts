@@ -105,11 +105,13 @@ export default defineSchema({
     searchText: v.string(),
     /** Portretfoto; wordt later door een beheerder gevuld. */
     imageUrl: v.optional(v.string()),
+    /** Schaatsen: "men", "women" of een aflossing, zodat zoeken per afstand klopt. */
+    category: v.optional(v.string()),
   })
     .index("by_sport_and_name", ["sport", "name"])
     .searchIndex("search_text", {
       searchField: "searchText",
-      filterFields: ["sport", "nation"],
+      filterFields: ["sport", "nation", "category"],
     }),
 
   participants: defineTable({

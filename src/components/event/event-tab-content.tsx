@@ -3,6 +3,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { ClassificationsTab } from "@/components/cycling/classifications-tab";
 import { RaceTab } from "@/components/cycling/race-tab";
 import { StagesTab } from "@/components/cycling/stages-tab";
+import { DistancesTab } from "@/components/skating/distances-tab";
 
 import { BracketTab } from "./bracket/bracket-tab";
 import type { EventTabKey } from "@/utils/event-tabs";
@@ -34,5 +35,7 @@ export function EventTabContent({ eventId, tab }: Props) {
       return <StagesTab eventId={eventId} />;
     case "classifications":
       return <ClassificationsTab eventId={eventId} />;
+    case "distances":
+      return <DistancesTab eventId={eventId} />;
   }
 }

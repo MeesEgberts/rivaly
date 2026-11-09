@@ -15,6 +15,8 @@ export const search = query({
     sport: v.string(),
     /** Alleen atleten uit dit land, als de vraag dat vraagt. */
     nation: v.optional(v.string()),
+    /** Alleen atleten uit deze categorie, bijv. "women". */
+    category: v.optional(v.string()),
     query: v.string(),
   },
   handler: async (ctx, args) => {
@@ -29,7 +31,12 @@ export const search = query({
       .query("athletes")
       .withSearchIndex("search_text", (q) => {
         const bySport = q.search("searchText", term).eq("sport", args.sport);
-        return args.nation ? bySport.eq("nation", args.nation) : bySport;
+        const byNation = args.nation
+          ? bySport.eq("nation", args.nation)
+          : bySport;
+        return args.category
+          ? byNation.eq("category", args.category)
+          : byNation;
       })
       .take(MAX_RESULTS);
 

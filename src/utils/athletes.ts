@@ -1,5 +1,6 @@
 import { OTHER_OPTION_ID } from "@modules/fixture-types/pick";
 import { modules } from "@modules/registry";
+import { isRelayCategory } from "@modules/skating/categories";
 import type {
   FixturePayload,
   FixturePrediction,
@@ -121,10 +122,19 @@ const NATION_ADJECTIVES: Record<string, string> = {
 };
 
 /** "renners" of "Nederlandse renners", afhankelijk van de pool. */
-export function poolNoun(pool: { sport: string; nation?: string }): {
+export function poolNoun(pool: {
+  sport: string;
+  nation?: string;
+  category?: string;
+}): {
   singular: string;
   plural: string;
 } {
+  // Bij een aflossing kies je een land, geen schaatser.
+  if (pool.category && isRelayCategory(pool.category)) {
+    return { singular: "ploeg", plural: "ploegen" };
+  }
+
   const noun = athleteNoun(pool.sport);
   const adjective = pool.nation ? NATION_ADJECTIVES[pool.nation] : undefined;
 

@@ -114,7 +114,16 @@ export async function assertAthletesInPool(
       payload.pool.nation !== undefined &&
       athlete?.nation !== payload.pool.nation;
 
-    if (!athlete || athlete.sport !== payload.pool.sport || wrongNation) {
+    const wrongCategory =
+      payload.pool.category !== undefined &&
+      athlete?.category !== payload.pool.category;
+
+    if (
+      !athlete ||
+      athlete.sport !== payload.pool.sport ||
+      wrongNation ||
+      wrongCategory
+    ) {
       throw new ConvexError(
         "Een van de gekozen atleten past niet bij deze vraag.",
       );

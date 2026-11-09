@@ -7,6 +7,7 @@ import { rankingFixtureType } from "./fixture-types/ranking";
 import { scoreFixtureType } from "./fixture-types/score";
 import { cyclingModule } from "./cycling/module";
 import { footballModule } from "./football/module";
+import { shorttrackModule, speedskatingModule } from "./skating/module";
 import type {
   FixtureTypeKey,
   RulesByType,
@@ -32,6 +33,8 @@ export const fixtureTypes = {
 export const modules: Record<string, SportModule> = {
   [footballModule.key]: footballModule,
   [cyclingModule.key]: cyclingModule,
+  [speedskatingModule.key]: speedskatingModule,
+  [shorttrackModule.key]: shorttrackModule,
 };
 
 export function getModule(moduleKey: string): SportModule {

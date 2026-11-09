@@ -1,5 +1,6 @@
 import { cyclingStageKinds } from "@modules/cycling/module";
 import { footballStageKinds } from "@modules/football/module";
+import { skatingStageKinds } from "@modules/skating/module";
 
 import type { EventData, EventFixture } from "@/hooks/use-event-data";
 
@@ -11,7 +12,8 @@ export type EventTabKey =
   | "bonus"
   | "race"
   | "stages"
-  | "classifications";
+  | "classifications"
+  | "distances";
 
 export interface EventTab {
   key: EventTabKey;
@@ -59,6 +61,11 @@ export function eventTabs(
 
   if (hasStageKind(stages, footballStageKinds.matchday)) {
     tabs.push({ key: "matchdays", label: "Speelrondes" });
+  }
+
+  // Schaatsen en shorttrack: de afstanden vóór de extra vragen.
+  if (hasFixturesInKind(stages, fixtures, skatingStageKinds.distances)) {
+    tabs.push({ key: "distances", label: "Afstanden" });
   }
 
   if (hasFixturesInKind(stages, fixtures, footballStageKinds.bonus)) {

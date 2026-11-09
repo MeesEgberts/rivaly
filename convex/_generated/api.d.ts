@@ -22,6 +22,7 @@ import type * as lib_eventPreview from "../lib/eventPreview.js";
 import type * as lib_inviteCode from "../lib/inviteCode.js";
 import type * as lib_reveal from "../lib/reveal.js";
 import type * as lib_slug from "../lib/slug.js";
+import type * as lib_skatingSeedData from "../lib/skatingSeedData.js";
 import type * as lib_standings from "../lib/standings.js";
 import type * as lib_userEvents from "../lib/userEvents.js";
 import type * as poules from "../poules.js";
@@ -30,6 +31,7 @@ import type * as scoring from "../scoring.js";
 import type * as seed from "../seed.js";
 import type * as seedCycling from "../seedCycling.js";
 import type * as seedImages from "../seedImages.js";
+import type * as seedSkating from "../seedSkating.js";
 import type * as users from "../users.js";
 
 import type {
@@ -53,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   "lib/inviteCode": typeof lib_inviteCode;
   "lib/reveal": typeof lib_reveal;
   "lib/slug": typeof lib_slug;
+  "lib/skatingSeedData": typeof lib_skatingSeedData;
   "lib/standings": typeof lib_standings;
   "lib/userEvents": typeof lib_userEvents;
   poules: typeof poules;
@@ -61,6 +64,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   seedCycling: typeof seedCycling;
   seedImages: typeof seedImages;
+  seedSkating: typeof seedSkating;
   users: typeof users;
 }>;
 

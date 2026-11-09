@@ -5,7 +5,7 @@ import { api } from "@convex/_generated/api";
 import type { AthleteInfo } from "@/types/athlete";
 
 interface Args {
-  pool: { sport: string; nation?: string };
+  pool: { sport: string; nation?: string; category?: string };
   /** De favorieten van de vraag, al omgezet naar atleten. */
   favourites: AthleteInfo[];
   search: string;
@@ -22,7 +22,12 @@ export function useAthleteOptions({ pool, favourites, search, chosen }: Args) {
   const results = useQuery(
     api.athletes.search,
     term.length > 0
-      ? { sport: pool.sport, nation: pool.nation, query: term }
+      ? {
+          sport: pool.sport,
+          nation: pool.nation,
+          category: pool.category,
+          query: term,
+        }
       : "skip",
   );
 
