@@ -1,32 +1,29 @@
 import { createContext, useContext } from "react";
 
 import type { AthleteInfo } from "@/types/athlete";
+import type { Slots } from "@/utils/athletes";
 
 export interface AthleteDraft {
-  /** Gekozen ids in volgorde; bij een keuzevraag hooguit één. */
-  order: string[];
-  /** Hoeveel plekken er zijn (1 bij een keuzevraag). */
-  size: number;
+  /** Vaste plekken; `null` is nog leeg. Bij een keuzevraag is er één plek. */
+  slots: Slots;
+  /** De plek die je nu kiest, of `null` als alles gevuld is en niets geselecteerd. */
+  active: number | null;
   /** Atleten die in deze sessie zijn gekozen, zodat hun naam meteen bekend is. */
   known: Map<string, AthleteInfo>;
   isStarted: boolean;
   /** Eenmalig vullen met de opgeslagen voorspelling of uitslag. */
   start: (order: string[], size: number) => void;
-  /** Voegt toe (of vervangt bij één plek). `allowRepeat` voor "Andere renner" in een uitslag. */
-  add: (athlete: AthleteInfo, allowRepeat?: boolean) => void;
-  remove: (index: number) => void;
-  /** Nieuwe volgorde na slepen. */
-  reorder: (order: string[]) => void;
-  /** Haalt een atleet weg als hij gekozen is, anders voegt hij hem toe. */
-  toggle: (athlete: AthleteInfo, allowRepeat?: boolean) => void;
+  /** Zet een atleet op de actieve plek en ga door naar de volgende lege. */
+  place: (athlete: AthleteInfo) => void;
+  /** Tik op een trede: die plek wordt actief (nog eens tikken: niet meer). */
+  select: (index: number) => void;
+  clear: (index: number) => void;
+  swap: (from: number, to: number) => void;
 }
 
 export const AthleteDraftContext = createContext<AthleteDraft | null>(null);
 
-/**
- * De keuze uit atleten in een voorspel- of uitslagmodal, gedeeld tussen het
- * overzicht en het zoekscherm in dezelfde modal-stack.
- */
+/** De podiumkeuze in een voorspel- of uitslagmodal. */
 export function useAthleteDraft(): AthleteDraft {
   const draft = useContext(AthleteDraftContext);
 

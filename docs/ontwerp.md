@@ -124,10 +124,14 @@ van die sport kiezen. De server controleert bij opslaan dat een keuze
 buiten de favorieten echt een atleet van die sport is, en levert de namen
 van gebruikte atleten mee in de deelnemerslijsten van `events.get` en
 `events.fixture`. In de app is er één weergave voor alle pool-vragen (je
-keuze of top N, "Zoek in alle renners", favorieten) met één zoekscherm
-(native zoekbalk, `athletes.search`), zowel bij voorspellen als bij het
-invoeren van een uitslag. De voorspel- en uitslagmodal hebben daarvoor een
-eigen stack (`predict/[fixtureId]/_layout.tsx`).
+podium, daaronder één lijst), zowel bij voorspellen als bij het invoeren van
+een uitslag. Het podium toont de treden 2–1–3 (of 4–2–1–3–5 bij een top 5);
+de blauwe trede is de plek die je nu kiest. Tik een renner in de lijst en
+hij komt daar; tik een gevulde trede om hem te vervangen; houd een renner
+vast en sleep hem naar een andere trede om te wisselen. De lijst heeft
+bovenaan een zoekveld (`athletes.search`, met landfilter) en toont zonder
+zoekterm de favorieten; gekozen renners staan er niet nog eens in. Is alles
+gevuld, dan verdwijnt de lijst.
 
 De puntentelling gebruikt dezelfde sleutels als voetbal (`classic`,
 `allOrNothing`), zodat één poule voetbal en wielrennen kan combineren.

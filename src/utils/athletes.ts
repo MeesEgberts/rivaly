@@ -55,27 +55,6 @@ export function orderToValue(
 }
 
 /**
- * Voegt een atleet toe. Bij één plek vervangt hij de vorige keuze; anders
- * komt hij achteraan zolang er plek is. Dubbel kan alleen met `allowRepeat`.
- */
-export function addToOrder(
-  order: string[],
-  id: string,
-  size: number,
-  allowRepeat: boolean,
-): string[] {
-  if (size === 1) {
-    return [id];
-  }
-
-  if (order.length >= size || (!allowRepeat && order.includes(id))) {
-    return order;
-  }
-
-  return [...order, id];
-}
-
-/**
  * Favorieten die je mag kiezen. "Andere renner" alleen in een uitslag of bij
  * een keuzevraag; in een voorspelde volgorde levert hij nooit punten op.
  */
@@ -158,69 +137,89 @@ export function poolNoun(pool: { sport: string; nation?: string }): {
   };
 }
 
+/** Plekken op het podium; `null` is een lege plek. */
+export type Slots = (string | null)[];
+
+/** Vaste plekken, gevuld met wat er al gekozen was. */
+export function slotsFrom(order: string[], size: number): Slots {
+  return Array.from({ length: size }, (_, index) => order[index] ?? null);
+}
+
+export function isComplete(slots: Slots): slots is string[] {
+  return slots.every((id) => id !== null);
+}
+
+/** De eerste lege plek, of `null` als alles gevuld is. */
+export function firstEmpty(slots: Slots): number | null {
+  const index = slots.indexOf(null);
+  return index >= 0 ? index : null;
+}
+
+/** Zet een atleet op een plek. Stond hij al ergens anders, dan wisselen ze. */
+export function placeAt(slots: Slots, index: number, id: string): Slots {
+  const next = [...slots];
+  const current = next.indexOf(id);
+
+  if (current >= 0) {
+    next[current] = next[index];
+  }
+
+  next[index] = id;
+  return next;
+}
+
+export function swapSlots(slots: Slots, from: number, to: number): Slots {
+  const next = [...slots];
+  [next[from], next[to]] = [next[to], next[from]];
+  return next;
+}
+
 /**
- * Wat er rechts bij een atleet in de lijst staat: zijn plek als hij gekozen
- * is, anders de plek waar hij terechtkomt (of niets als alles vol is).
+ * Volgorde waarin de treden naast elkaar staan, als posities (0 = plek 1):
+ * de winnaar in het midden, daarna afwisselend links en rechts (2–1–3,
+ * 4–2–1–3–5).
  */
-export function placeLabel(
-  id: string,
-  order: string[],
-  size: number,
-): { text: string; isChosen: boolean } | null {
-  const index = order.indexOf(id);
+export function podiumLayout(size: number): number[] {
+  const layout = [0];
 
-  if (index >= 0) {
-    return { text: size > 1 ? `Plek ${index + 1}` : "Gekozen", isChosen: true };
+  for (let position = 1; position < size; position += 1) {
+    if (position % 2 === 1) {
+      layout.unshift(position);
+    } else {
+      layout.push(position);
+    }
   }
 
-  if (size === 1) {
-    return { text: "Kies", isChosen: false };
-  }
-
-  if (order.length >= size) {
-    return null;
-  }
-
-  return { text: `Plek ${order.length + 1}`, isChosen: false };
+  return layout;
 }
 
-/** Uitleg onder de top N, afhankelijk van hoe ver je bent. */
-export function topNHint(filled: number, size: number, noun: string): string {
-  if (size === 1) {
-    return filled === 0
-      ? `Tik een ${noun} hieronder aan of zoek in de hele lijst.`
-      : `Tik een andere ${noun} aan om te wisselen.`;
-  }
-
-  if (filled === 0) {
-    return `Tik een ${noun} hieronder aan: hij komt op plek 1.`;
-  }
-
-  const drag = `Sleep aan ≡ om de volgorde te wijzigen.`;
-
-  if (filled === 1) {
-    return `Volgende ${noun} komt op plek 2.`;
-  }
-
-  if (filled < size) {
-    return `Volgende ${noun} komt op plek ${filled + 1}. ${drag}`;
-  }
-
-  return drag;
+/** Hoogte van het blok van een trede: plek 1 het hoogst. */
+export function stepHeight(position: number, size: number): number {
+  const max = 64;
+  const min = 30;
+  return size <= 1 ? max : max - ((max - min) * position) / (size - 1);
 }
 
-/** Maten van de native plekkenlijst op iOS, gemeten in de simulator. */
-export const SLOT_LIST = {
-  rowHeight: 58,
-  /** Ruimte die SwiftUI boven een sectie zonder kop houdt. */
-  topInset: 34,
-  bottomInset: 16,
-  /** Hoe ver de inset-grouped lijst inspringt ten opzichte van onze kaarten. */
-  sideInset: 17,
-} as const;
+/** Uitleg boven de lijst, afhankelijk van welke plek je nu kiest. */
+export function choiceHint(
+  slots: Slots,
+  active: number | null,
+  infoName: (id: string) => string,
+): string {
+  if (active === null) {
+    if (slots.length === 1) {
+      return "Tik je keuze om een ander te kiezen.";
+    }
 
-export function slotListHeight(slots: number): number {
-  return (
-    SLOT_LIST.topInset + slots * SLOT_LIST.rowHeight + SLOT_LIST.bottomInset
-  );
+    const what = slots.length === 3 ? "podium" : `top ${slots.length}`;
+    return `Je ${what} staat. Tik een trede om iemand te vervangen.`;
+  }
+
+  const occupant = slots[active];
+
+  if (occupant) {
+    return `Kies wie ${infoName(occupant)} vervangt`;
+  }
+
+  return slots.length > 1 ? `Kies plek ${active + 1}` : "Kies je renner";
 }

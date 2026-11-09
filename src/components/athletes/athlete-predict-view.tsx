@@ -8,7 +8,7 @@ import { useAthleteDraft } from "@/hooks/use-athlete-draft";
 import { useNow } from "@/hooks/use-now";
 import { useSavePrediction } from "@/hooks/use-save-prediction";
 import type { FixtureDetail } from "@/types/fixture-detail";
-import { isAthletePool, orderToValue, slotCount } from "@/utils/athletes";
+import { isAthletePool, isComplete, orderToValue } from "@/utils/athletes";
 import { isFixtureOpen } from "@/utils/match-rows";
 
 import { AthleteChoiceBody } from "./athlete-choice-body";
@@ -30,31 +30,29 @@ export function AthletePredictView({ fixture }: Props) {
   }
 
   const isOpen = isFixtureOpen(fixture, now);
-  const isComplete = draft.order.length === slotCount(payload);
+  const slots = draft.slots;
+  const complete = isComplete(slots);
 
   return (
     <>
       <ModalToolbar
         onConfirm={
-          isOpen ? () => submit(orderToValue(payload, draft.order)) : undefined
+          isOpen
+            ? () => submit(orderToValue(payload, slots as string[]))
+            : undefined
         }
-        isConfirmDisabled={!isComplete || isSaving}
+        isConfirmDisabled={!complete || isSaving}
       />
       <ScrollView
         style={{ backgroundColor: colors.background }}
         contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={styles.content}
       >
         <PredictHeaderCard fixture={fixture} isOpen={isOpen} />
         {isOpen ? (
-          <AthleteChoiceBody
-            fixture={fixture}
-            mode="prediction"
-            searchHref={{
-              pathname: "/predict/[fixtureId]/athletes",
-              params: { fixtureId: fixture._id },
-            }}
-          />
+          <AthleteChoiceBody fixture={fixture} mode="prediction" />
         ) : (
           <PredictLockedCard fixture={fixture} />
         )}

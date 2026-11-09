@@ -10,7 +10,7 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAthleteDraft } from "@/hooks/use-athlete-draft";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
 import type { FixtureDetail } from "@/types/fixture-detail";
-import { isAthletePool, orderToValue, slotCount } from "@/utils/athletes";
+import { isAthletePool, isComplete, orderToValue } from "@/utils/athletes";
 import { showError } from "@/utils/error-message";
 import { describeValue } from "@/utils/fixture-text";
 
@@ -34,7 +34,8 @@ export function AthleteResultForm({ fixture }: Props) {
     return null;
   }
 
-  const isComplete = draft.order.length === slotCount(payload);
+  const slots = draft.slots;
+  const complete = isComplete(slots);
   const current = fixture.result
     ? `Nu: ${describeValue(fixture.result, payload, participants)} (${fixture.status})`
     : `Nog geen uitslag (${fixture.status})`;
@@ -56,7 +57,7 @@ export function AthleteResultForm({ fixture }: Props) {
     run(() =>
       setResult({
         fixtureId: fixture._id,
-        result: orderToValue(payload, draft.order),
+        result: orderToValue(payload, slots as string[]),
         status,
       }),
     );
@@ -65,6 +66,8 @@ export function AthleteResultForm({ fixture }: Props) {
     <ScrollView
       style={{ backgroundColor: colors.background }}
       contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       contentContainerStyle={styles.content}
     >
       <PredictHeaderCard
@@ -73,24 +76,17 @@ export function AthleteResultForm({ fixture }: Props) {
         fallbackTitle="Uitslag"
         note={current}
       />
-      <AthleteChoiceBody
-        fixture={fixture}
-        mode="result"
-        searchHref={{
-          pathname: "/result/[fixtureId]/athletes",
-          params: { fixtureId: fixture._id },
-        }}
-      />
+      <AthleteChoiceBody fixture={fixture} mode="result" />
       <PrimaryButton
         label="Opslaan als eindstand"
         onPress={() => save("finished")}
-        disabled={isBusy || !isComplete}
+        disabled={isBusy || !complete}
       />
       <PrimaryButton
         label="Opslaan als tussenstand"
         variant="secondary"
         onPress={() => save("live")}
-        disabled={isBusy || !isComplete}
+        disabled={isBusy || !complete}
       />
       {fixture.result ? (
         <PrimaryButton
