@@ -84,4 +84,5 @@ export const cyclingModule: SportModule = {
   stageKinds: Object.values(cyclingStageKinds),
   presets: cyclingPresets,
   series: cyclingSeries,
+  athleteNoun: { singular: "renner", plural: "renners" },
 };

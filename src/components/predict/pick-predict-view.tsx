@@ -14,9 +14,6 @@ import type { FixtureDetail } from "@/types/fixture-detail";
 import { TeamPickCard } from "./team-pick-card";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
 import { useSavePrediction } from "@/hooks/use-save-prediction";
-import { matchesSearch, SEARCH_THRESHOLD } from "@/utils/search";
-
-import { OptionSearchField } from "./option-search-field";
 
 interface Props {
   fixture: FixtureDetail;
@@ -34,24 +31,13 @@ export function PickPredictView({ fixture }: Props) {
       ? fixture.myPrediction.optionId
       : null;
   const [selected, setSelected] = useState<string | null>(saved);
-  const [search, setSearch] = useState("");
 
   if (fixture.payload.type !== "pick") {
     return null;
   }
 
   const isOpen = isFixtureOpen(fixture, now);
-  const allOptions = fixture.payload.options;
-  const hasSearch = allOptions.length > SEARCH_THRESHOLD;
-  // Je gekozen optie blijft zichtbaar, ook als hij niet bij de zoekterm past.
-  const options = allOptions.filter(
-    (option) =>
-      option.id === selected ||
-      matchesSearch(
-        [option.label, participants.get(option.id)?.code ?? ""],
-        search,
-      ),
-  );
+  const options = fixture.payload.options;
 
   const choose = (optionId: string) => {
     tapFeedback();
@@ -84,13 +70,6 @@ export function PickPredictView({ fixture }: Props) {
 
         {isOpen ? (
           <>
-            {hasSearch ? (
-              <OptionSearchField
-                value={search}
-                onChange={setSearch}
-                placeholder="Zoek op naam of land"
-              />
-            ) : null}
             <Text style={[styles.hint, { color: colors.secondaryLabel }]}>
               Tik je keuze
             </Text>

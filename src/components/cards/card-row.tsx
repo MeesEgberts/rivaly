@@ -15,6 +15,8 @@ interface Props {
   isHighlighted?: boolean;
   /** Laatste rij in de kaart: geen scheidingslijn. */
   isLast?: boolean;
+  /** Tikbaar zonder chevron, bijv. als rechts al een plusje staat. */
+  hideChevron?: boolean;
 }
 
 /** Rij binnen een `Card`, met optioneel een chevron als hij tikbaar is. */
@@ -26,6 +28,7 @@ export function CardRow({
   onPress,
   isHighlighted = false,
   isLast = false,
+  hideChevron = false,
 }: Props) {
   const colors = useAppColors();
 
@@ -71,7 +74,7 @@ export function CardRow({
           ) : null}
         </View>
         {trailing}
-        {onPress ? (
+        {onPress && !hideChevron ? (
           <SymbolView
             name="chevron.right"
             size={13}

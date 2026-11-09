@@ -1,6 +1,6 @@
 import { ConvexError, v, type Infer } from "convex/values";
 
-import { OTHER_OPTION_ID, optionValidator } from "./pick";
+import { athletePoolValidator, OTHER_OPTION_ID, optionValidator } from "./pick";
 import type { FixtureType } from "../types";
 
 /** Een volgorde van de top N: podium, medaillespiegel, eindstand van een groep. */
@@ -9,6 +9,8 @@ export const rankingPayloadValidator = v.object({
   options: v.array(optionValidator),
   /** Hoeveel plekken worden voorspeld (3 voor een podium). */
   size: v.number(),
+  /** Kiezen uit alle atleten van een sport; `options` zijn dan de favorieten. */
+  pool: v.optional(athletePoolValidator),
 });
 
 export const rankingResultValidator = v.object({
@@ -43,7 +45,9 @@ function assertValidOrder(
   }
 
   if (!allowOther && order.includes(OTHER_OPTION_ID)) {
-    throw new ConvexError("Kies voor elke plek een renner of team uit de lijst.");
+    throw new ConvexError(
+      "Kies voor elke plek een renner of team uit de lijst.",
+    );
   }
 
   // "Iemand anders" mag in een uitslag vaker voorkomen; de rest maar één keer.
@@ -57,8 +61,11 @@ function assertValidOrder(
   const knownIds = new Set(payload.options.map((option) => option.id));
 
   for (const id of order) {
-    if (!knownIds.has(id)) {
-      throw new ConvexError("Een van de gekozen deelnemers hoort niet bij dit onderdeel.");
+    // Met een pool mag het ook een andere atleet zijn; dat checkt de server.
+    if (!knownIds.has(id) && !payload.pool) {
+      throw new ConvexError(
+        "Een van de gekozen deelnemers hoort niet bij dit onderdeel.",
+      );
     }
   }
 }
@@ -93,7 +100,8 @@ export const rankingFixtureType: FixtureType<
 
       if (result.order[index] === id) {
         points += rules.exactPosition;
-        breakdown.exactPosition = (breakdown.exactPosition ?? 0) + rules.exactPosition;
+        breakdown.exactPosition =
+          (breakdown.exactPosition ?? 0) + rules.exactPosition;
         return;
       }
 

@@ -116,6 +116,19 @@ sporten bruikbaar zijn:
   volgorde mag alleen de uitslag hem gebruiken, ook op meerdere plekken, en
   levert hij nooit punten op; in het voorspelscherm is hij verborgen.
 
+**Atleten** (tabel `athletes`, 9 november 2026): renners (en later schaatsers)
+staan één keer per sport in de database, met een zoekindex op naam en land
+(zonder accenten). Een keuze- of volgordevraag kan een `pool: { sport }`
+hebben: de `options` zijn dan alleen de favorieten, en je mag elke atleet
+van die sport kiezen. De server controleert bij opslaan dat een keuze
+buiten de favorieten echt een atleet van die sport is, en levert de namen
+van gebruikte atleten mee in de deelnemerslijsten van `events.get` en
+`events.fixture`. In de app is er één weergave voor alle pool-vragen (je
+keuze of top N, "Zoek in alle renners", favorieten) met één zoekscherm
+(native zoekbalk, `athletes.search`), zowel bij voorspellen als bij het
+invoeren van een uitslag. De voorspel- en uitslagmodal hebben daarvoor een
+eigen stack (`predict/[fixtureId]/_layout.tsx`).
+
 De puntentelling gebruikt dezelfde sleutels als voetbal (`classic`,
 `allOrNothing`), zodat één poule voetbal en wielrennen kan combineren.
 Seed: `npx convex run seedCycling:calendar2027` (klassiekers, monumenten en

@@ -3,6 +3,7 @@ import { ConvexError, v } from "convex/values";
 import { getModule } from "../modules/registry";
 import { query } from "./_generated/server";
 import { assertCanViewEvent } from "./lib/access";
+import { athleteIdsOf, athletesAsParticipants } from "./lib/athletes";
 import { requireUser } from "./lib/auth";
 
 const MAX_CATALOG = 50;
@@ -87,6 +88,34 @@ export const get = query({
 
     const module = getModule(event.moduleKey);
 
+    // Atleten uit een pool (bijv. renners) staan niet bij de deelnemers van
+    // het evenement; zoek de favorieten, uitslagen en mijn keuzes erbij.
+    const fixtures = await ctx.db
+      .query("fixtures")
+      .withIndex("by_event_and_order", (q) => q.eq("eventId", event._id))
+      .take(MAX_FIXTURES);
+    const myPredictions = await ctx.db
+      .query("predictions")
+      .withIndex("by_user_and_event", (q) =>
+        q.eq("userId", user._id).eq("eventId", event._id),
+      )
+      .take(MAX_FIXTURES);
+    const predictionByFixture = new Map(
+      myPredictions.map((prediction) => [
+        prediction.fixtureId,
+        prediction.payload,
+      ]),
+    );
+    const athletes = await athletesAsParticipants(
+      ctx,
+      fixtures.flatMap((fixture) =>
+        athleteIdsOf(fixture.payload, [
+          fixture.result,
+          predictionByFixture.get(fixture._id),
+        ]),
+      ),
+    );
+
     return {
       _id: event._id,
       name: event.name,
@@ -106,14 +135,17 @@ export const get = query({
         order: stage.order,
         kind: stage.kind,
       })),
-      participants: participants.map((participant) => ({
-        _id: participant._id,
-        name: participant.name,
-        shortName: participant.shortName ?? null,
-        code: participant.code ?? null,
-        imageUrl: participant.imageUrl ?? null,
-        groupKey: participant.groupKey ?? null,
-      })),
+      participants: [
+        ...participants.map((participant) => ({
+          _id: participant._id as string,
+          name: participant.name,
+          shortName: participant.shortName ?? null,
+          code: participant.code ?? null,
+          imageUrl: participant.imageUrl ?? null,
+          groupKey: participant.groupKey ?? null,
+        })),
+        ...athletes,
+      ],
     };
   },
 });
@@ -214,12 +246,22 @@ export const fixture = query({
       result: fixtureDoc.result ?? null,
       details: fixtureDoc.details ?? null,
       myPrediction: prediction?.payload ?? null,
-      participants: participants.map((participant) => ({
-        _id: participant._id,
-        name: participant.name,
-        shortName: participant.shortName ?? null,
-        code: participant.code ?? null,
-      })),
+      // Pool-onderdelen: atleten uit de favorieten, uitslag en mijn keuze.
+      participants: [
+        ...participants.map((participant) => ({
+          _id: participant._id as string,
+          name: participant.name,
+          shortName: participant.shortName ?? null,
+          code: participant.code ?? null,
+        })),
+        ...(await athletesAsParticipants(
+          ctx,
+          athleteIdsOf(fixtureDoc.payload, [
+            fixtureDoc.result,
+            prediction?.payload,
+          ]),
+        )),
+      ],
     };
   },
 });

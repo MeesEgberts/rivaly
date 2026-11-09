@@ -12,13 +12,14 @@ export default function AppLayout() {
           name="events/[eventId]"
           options={{ title: "Programma" }}
         />
+        {/* Modals met een eigen stack (zoekscherm voor atleten). */}
         <Stack.Screen
           name="predict/[fixtureId]"
-          options={{ title: "Voorspellen", presentation: "modal" }}
+          options={{ presentation: "modal", headerShown: false }}
         />
         <Stack.Screen
           name="result/[fixtureId]"
-          options={{ title: "Uitslag invoeren", presentation: "modal" }}
+          options={{ presentation: "modal", headerShown: false }}
         />
       </Stack>
     </AuthGate>

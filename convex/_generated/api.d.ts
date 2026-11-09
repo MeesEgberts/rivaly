@@ -9,8 +9,10 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as athletes from "../athletes.js";
 import type * as events from "../events.js";
 import type * as lib_access from "../lib/access.js";
+import type * as lib_athletes from "../lib/athletes.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_cyclingSeedData from "../lib/cyclingSeedData.js";
 import type * as lib_inviteCode from "../lib/inviteCode.js";
@@ -31,8 +33,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  athletes: typeof athletes;
   events: typeof events;
   "lib/access": typeof lib_access;
+  "lib/athletes": typeof lib_athletes;
   "lib/auth": typeof lib_auth;
   "lib/cyclingSeedData": typeof lib_cyclingSeedData;
   "lib/inviteCode": typeof lib_inviteCode;

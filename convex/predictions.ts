@@ -6,6 +6,7 @@ import { fixturePredictionValidator } from "../modules/validators";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { isInPouleWithEvent } from "./lib/access";
+import { assertAthletesInPool } from "./lib/athletes";
 import { requireMembership, requireUser } from "./lib/auth";
 import { eventIdsForUser } from "./lib/userEvents";
 
@@ -37,6 +38,7 @@ export const save = mutation({
     }
 
     assertPredictionFits(fixture.payload, args.payload);
+    await assertAthletesInPool(ctx, fixture.payload, args.payload);
 
     const allowed = await isInPouleWithEvent(ctx, fixture.eventId, user._id);
 

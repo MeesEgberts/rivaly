@@ -86,6 +86,26 @@ export default defineSchema({
     kind: v.string(),
   }).index("by_event_and_order", ["eventId", "order"]),
 
+  /**
+   * Atleten per sport (renners, schaatsers, ...). Onderdelen met een `pool`
+   * laten je hieruit kiezen; zoeken gaat via de zoekindex.
+   */
+  athletes: defineTable({
+    sport: v.string(),
+    name: v.string(),
+    /** Achternaam voor krappe plekken, bijv. "Van der Poel". */
+    shortName: v.string(),
+    /** Landcode voor de badge, bijv. "NED". */
+    nation: v.string(),
+    /** Naam en land zonder accenten, voor de zoekindex. */
+    searchText: v.string(),
+  })
+    .index("by_sport_and_name", ["sport", "name"])
+    .searchIndex("search_text", {
+      searchField: "searchText",
+      filterFields: ["sport"],
+    }),
+
   participants: defineTable({
     eventId: v.id("events"),
     name: v.string(),

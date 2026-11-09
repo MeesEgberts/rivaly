@@ -58,3 +58,8 @@ export function formatDateRange(start: number, end: number): string {
 
   return `${from} – ${to}`;
 }
+
+/** "renners" → "Renners" */
+export function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}

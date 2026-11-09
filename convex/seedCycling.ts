@@ -5,7 +5,9 @@ import { OTHER_OPTION_ID } from "../modules/fixture-types/pick";
 import type { FixtureDetails } from "../modules/validators";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
+import { athleteSearchText } from "./lib/athletes";
 import {
+  ALL_RIDERS,
   CLASSICS_2027,
   TEST_TOUR_STAGES,
   TOUR_2027_STAGE_DATES,
@@ -22,7 +24,10 @@ import { firstAdminOrUser } from "./seed";
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
-type RiderIds = Map<string, Id<"participants">>;
+type RiderIds = Map<string, Id<"athletes">>;
+
+const SPORT = "cycling";
+const POOL = { sport: SPORT };
 
 /**
  * "Mathieu van der Poel" → "Van der Poel", voor in krappe rijen. Zonder
@@ -48,22 +53,40 @@ function surnameParts(name: string): string {
   return parts.slice(1).join(" ") || name;
 }
 
-async function insertRiders(
-  ctx: MutationCtx,
-  eventId: Id<"events">,
-  riders: SeedRider[],
-): Promise<RiderIds> {
+/**
+ * Zet alle renners in de atletentabel (bestaande worden hergebruikt) en
+ * geeft hun ids terug op naam.
+ */
+async function upsertRiders(ctx: MutationCtx): Promise<RiderIds> {
   const ids: RiderIds = new Map();
 
-  for (const rider of riders) {
-    const id = await ctx.db.insert("participants", {
-      eventId,
-      name: rider.name,
-      shortName: surname(rider.name),
-      code: rider.nation,
-    });
+  for (const seedRider of ALL_RIDERS) {
+    const existing = await ctx.db
+      .query("athletes")
+      .withIndex("by_sport_and_name", (q) =>
+        q.eq("sport", SPORT).eq("name", seedRider.name),
+      )
+      .unique();
 
-    ids.set(rider.name, id);
+    if (existing) {
+      ids.set(seedRider.name, existing._id);
+      continue;
+    }
+
+    const athlete = {
+      sport: SPORT,
+      name: seedRider.name,
+      shortName: surname(seedRider.name),
+      nation: seedRider.nation,
+    };
+
+    ids.set(
+      seedRider.name,
+      await ctx.db.insert("athletes", {
+        ...athlete,
+        searchText: athleteSearchText(athlete),
+      }),
+    );
   }
 
   return ids;
@@ -105,6 +128,7 @@ async function eventExists(ctx: MutationCtx, slug: string): Promise<boolean> {
 async function insertClassic(
   ctx: MutationCtx,
   classic: SeedClassic,
+  riderIds: RiderIds,
   createdBy: Id<"users">,
 ): Promise<Id<"events"> | null> {
   const slug = `cycling-${classic.key}-2027`;
@@ -127,7 +151,6 @@ async function insertClassic(
     meta: { shortName: classic.shortName, series: classic.series },
   });
 
-  const riderIds = await insertRiders(ctx, eventId, classic.riders);
   const dutchRiders = classic.riders.filter((rider) => rider.nation === "NED");
 
   const stageId = await ctx.db.insert("stages", {
@@ -161,6 +184,7 @@ async function insertClassic(
       type: "ranking",
       size: 3,
       options: riderOptions(classic.riders, riderIds),
+      pool: POOL,
     },
   });
 
@@ -196,6 +220,7 @@ interface GrandTourInput {
   /** Etappenummers waarop een nieuwe week begint, bijv. [1, 10, 16]. */
   weekStarts: number[];
   series: string[];
+  riderIds: RiderIds;
   createdBy: Id<"users">;
 }
 
@@ -208,6 +233,7 @@ async function insertGrandTour(
   ctx: MutationCtx,
   input: GrandTourInput,
 ): Promise<Id<"events"> | null> {
+  const { riderIds } = input;
   if (await eventExists(ctx, input.slug)) {
     return null;
   }
@@ -227,8 +253,6 @@ async function insertGrandTour(
     createdBy: input.createdBy,
     meta: { shortName: input.shortName, series: input.series },
   });
-
-  const riderIds = await insertRiders(ctx, eventId, TOUR_RIDERS);
 
   const classificationStage = await ctx.db.insert("stages", {
     eventId,
@@ -271,6 +295,7 @@ async function insertGrandTour(
       type: "ranking",
       size: 5,
       options: riderOptions(TOUR_CLASSIFICATIONS.gc, riderIds),
+      pool: POOL,
     },
   });
 
@@ -299,7 +324,11 @@ async function insertGrandTour(
       order: order++,
       label: jersey.label,
       details: { jersey: jersey.jersey },
-      payload: { type: "pick", options: riderOptions(jersey.riders, riderIds) },
+      payload: {
+        type: "pick",
+        options: riderOptions(jersey.riders, riderIds),
+        pool: POOL,
+      },
     });
   }
 
@@ -308,6 +337,7 @@ async function insertGrandTour(
     type: "pick",
     order: order++,
     label: "Beste ploeg (etappezeges)",
+    details: { icon: "person.3.fill" },
     payload: {
       type: "pick",
       options: [
@@ -350,7 +380,7 @@ async function insertGrandTour(
         distanceKm: stage.distanceKm,
         profile: stage.profile,
       },
-      payload: { type: "ranking", size: 3, options: stageOptions },
+      payload: { type: "ranking", size: 3, options: stageOptions, pool: POOL },
     });
   }
 
@@ -368,10 +398,11 @@ export const calendar2027 = internalMutation({
   returns: v.array(v.id("events")),
   handler: async (ctx) => {
     const createdBy = await firstAdminOrUser(ctx);
+    const riderIds = await upsertRiders(ctx);
     const created: Id<"events">[] = [];
 
     for (const classic of CLASSICS_2027) {
-      const eventId = await insertClassic(ctx, classic, createdBy);
+      const eventId = await insertClassic(ctx, classic, riderIds, createdBy);
 
       if (eventId) {
         created.push(eventId);
@@ -387,6 +418,7 @@ export const calendar2027 = internalMutation({
       })),
       weekStarts: TOUR_WEEK_STARTS,
       series: ["grandTours"],
+      riderIds,
       createdBy,
     });
 
@@ -409,6 +441,7 @@ export const testTour = internalMutation({
   returns: v.id("events"),
   handler: async (ctx, args) => {
     const createdBy = await firstAdminOrUser(ctx);
+    const riderIds = await upsertRiders(ctx);
     const now = Date.now();
     const firstStart = now + (args.startInHours ?? 2) * HOUR;
 
@@ -422,6 +455,7 @@ export const testTour = internalMutation({
       })),
       weekStarts: [1],
       series: [],
+      riderIds,
       createdBy,
     });
 

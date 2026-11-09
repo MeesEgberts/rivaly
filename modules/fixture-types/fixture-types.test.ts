@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { numericFixtureType } from "./numeric";
-import { OTHER_OPTION_ID, pickFixtureType, type PickPayload } from "./pick";
+import {
+  idsOutsideOptions,
+  OTHER_OPTION_ID,
+  pickFixtureType,
+  type PickPayload,
+} from "./pick";
 import { rankingFixtureType, type RankingPayload } from "./ranking";
 import { scoreFixtureType } from "./score";
 import { defaultRules, resolveRules, scorePrediction } from "../registry";
@@ -308,5 +313,53 @@ describe("wielrennen", () => {
 
     // Pedersen exact (5), Pogačar en Van der Poel wel op het podium (2 + 2)
     expect(outcome.points).toBe(9);
+  });
+});
+
+describe("atletenpool", () => {
+  const favourites = ["a", "b"].map((id) => ({ id, label: id }));
+
+  it("staat bij een pool ook atleten buiten de favorieten toe", () => {
+    const pick: PickPayload = {
+      type: "pick",
+      options: favourites,
+      pool: { sport: "cycling" },
+    };
+    const ranking: RankingPayload = {
+      type: "ranking",
+      size: 2,
+      options: favourites,
+      pool: { sport: "cycling" },
+    };
+
+    expect(() =>
+      pickFixtureType.assertPredictionFits(pick, {
+        type: "pick",
+        optionId: "zoekresultaat",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      rankingFixtureType.assertPredictionFits(ranking, {
+        type: "ranking",
+        order: ["a", "zoekresultaat"],
+      }),
+    ).not.toThrow();
+  });
+
+  it("weigert zonder pool een keuze buiten de opties", () => {
+    const pick: PickPayload = { type: "pick", options: favourites };
+
+    expect(() =>
+      pickFixtureType.assertPredictionFits(pick, {
+        type: "pick",
+        optionId: "zoekresultaat",
+      }),
+    ).toThrow();
+  });
+
+  it("geeft de ids die de server als atleet moet controleren", () => {
+    expect(
+      idsOutsideOptions(favourites, ["a", "x", OTHER_OPTION_ID, "x"]),
+    ).toEqual(["x"]);
   });
 });

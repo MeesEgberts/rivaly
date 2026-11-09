@@ -6,7 +6,8 @@
  * dezelfde code als waarmee de client formulieren toont.
  */
 
-export type FixtureTypeKey = "score" | "pick" | "ranking" | "numeric" | "bracket";
+export type FixtureTypeKey =
+  "score" | "pick" | "ranking" | "numeric" | "bracket";
 
 export interface ScoreOutcome {
   points: number;
@@ -68,6 +69,8 @@ export interface SportModule {
   presets: ScoringPreset[];
   /** Reeksen waaruit een poule in één tik alle evenementen kiest. */
   series?: EventSeries[];
+  /** Hoe een atleet van deze sport heet, bijv. renner/renners. */
+  athleteNoun?: { singular: string; plural: string };
 }
 
 // De concrete Rules-typen worden in de fixture-types gedefinieerd en hier

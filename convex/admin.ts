@@ -8,6 +8,7 @@ import {
 } from "../modules/validators";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { assertAthletesInPool } from "./lib/athletes";
 import { requireAdmin } from "./lib/auth";
 
 /**
@@ -206,6 +207,7 @@ export const setResult = mutation({
     }
 
     assertResultFits(fixture.payload, args.result);
+    await assertAthletesInPool(ctx, fixture.payload, args.result);
 
     await ctx.db.patch("fixtures", args.fixtureId, {
       result: args.result,

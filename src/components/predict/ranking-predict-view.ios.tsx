@@ -6,7 +6,6 @@ import {
   List,
   Section,
   Text,
-  TextField,
   VStack,
 } from "@expo/ui/swift-ui";
 import {
@@ -39,7 +38,6 @@ import { describeContext } from "@/utils/fixture-text";
 import type { RankingPredictViewProps } from "./ranking-predict-view";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
 import { useSavePrediction } from "@/hooks/use-save-prediction";
-import { matchesSearch, SEARCH_THRESHOLD } from "@/utils/search";
 
 /**
  * iOS: top N als native lijst in bewerkmodus. Sleep aan ≡ voor de volgorde,
@@ -52,7 +50,6 @@ export function RankingPredictView({ fixture }: RankingPredictViewProps) {
   const { submit, isSaving } = useSavePrediction(fixture._id);
 
   const [chosen, setChosen] = useState<string[]>(() => initialRanking(fixture));
-  const [search, setSearch] = useState("");
 
   if (fixture.payload.type !== "ranking") {
     return null;
@@ -62,15 +59,8 @@ export function RankingPredictView({ fixture }: RankingPredictViewProps) {
   const isOpen = isFixtureOpen(fixture, now);
   const teamOf = (id: string) => rankingOptionTeam(payload, participants, id);
 
-  const predictable = predictableRankingOptions(payload);
-  const hasSearch = predictable.length > SEARCH_THRESHOLD;
-  const remaining = predictable.filter(
-    (option) =>
-      !chosen.includes(option.id) &&
-      matchesSearch(
-        [option.label, participants.get(option.id)?.code ?? ""],
-        search,
-      ),
+  const remaining = predictableRankingOptions(payload).filter(
+    (option) => !chosen.includes(option.id),
   );
   const isFull = chosen.length >= payload.size;
   // Moet je alle opties ordenen (4 uit 4), dan valt er niets weg te halen.
@@ -181,23 +171,8 @@ export function RankingPredictView({ fixture }: RankingPredictViewProps) {
             </List.ForEach>
           </Section>
 
-          {hasSearch && !isFull ? (
-            <Section title="Voeg toe">
-              <HStack spacing={8}>
-                <Image
-                  systemName="magnifyingglass"
-                  modifiers={[foregroundStyle(iosColors.secondaryLabel)]}
-                />
-                <TextField
-                  placeholder="Zoek op naam of land"
-                  onTextChange={setSearch}
-                />
-              </HStack>
-            </Section>
-          ) : null}
-
           {remaining.length > 0 && !isFull ? (
-            <Section title={hasSearch ? undefined : "Voeg toe"}>
+            <Section title="Voeg toe">
               {remaining.map((option) => (
                 <Button key={option.id} onPress={() => add(option.id)}>
                   <HStack spacing={12}>
