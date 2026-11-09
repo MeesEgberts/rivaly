@@ -1,27 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
 <defs>
-  <linearGradient id="gold" x1="300" y1="200" x2="720" y2="820" gradientUnits="userSpaceOnUse">
-    <stop offset="0" stop-color="#FFF1B0"/>
-    <stop offset="0.35" stop-color="#F7CF4F"/>
-    <stop offset="0.7" stop-color="#E0A526"/>
-    <stop offset="1" stop-color="#B97A12"/>
+  <linearGradient id="cupLight" x1="0" y1="200" x2="0" y2="612" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#FCE7A4"/>
+    <stop offset="1" stop-color="#EDC462"/>
   </linearGradient>
-  <linearGradient id="goldSide" x1="332" y1="0" x2="692" y2="0" gradientUnits="userSpaceOnUse">
-    <stop offset="0" stop-color="#F9D867"/>
-    <stop offset="0.45" stop-color="#FFE9A0"/>
-    <stop offset="0.75" stop-color="#E9B23A"/>
-    <stop offset="1" stop-color="#C98B1A"/>
+  <linearGradient id="cupDark" x1="0" y1="200" x2="0" y2="612" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#EDB94E"/>
+    <stop offset="1" stop-color="#D49A33"/>
   </linearGradient>
-  <linearGradient id="rim" x1="0" y1="196" x2="0" y2="238" gradientUnits="userSpaceOnUse">
-    <stop offset="0" stop-color="#FFF4C2"/>
-    <stop offset="1" stop-color="#E7B03A"/>
+  <linearGradient id="handleL" x1="150" y1="0" x2="380" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#F6D57E"/>
+    <stop offset="1" stop-color="#EBC260"/>
   </linearGradient>
-  <linearGradient id="base" x1="0" y1="684" x2="0" y2="812" gradientUnits="userSpaceOnUse">
-    <stop offset="0" stop-color="#F3C54C"/>
-    <stop offset="1" stop-color="#B57611"/>
+  <linearGradient id="handleR" x1="644" y1="0" x2="874" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#E6B24A"/>
+    <stop offset="1" stop-color="#D59B35"/>
+  </linearGradient>
+  <linearGradient id="foot" x1="380" y1="0" x2="644" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#F2CF72"/>
+    <stop offset="0.55" stop-color="#E8BC57"/>
+    <stop offset="1" stop-color="#D19634"/>
+  </linearGradient>
+  <linearGradient id="plaque" x1="0" y1="756" x2="0" y2="856" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#EDC462"/>
+    <stop offset="1" stop-color="#D29A37"/>
   </linearGradient>
 </defs>
-<g fill="none" stroke="url(#gold)" stroke-width="42" stroke-linecap="round">
-  <path d="M344 262 C252 248 220 300 230 362 C242 434 300 474 384 492"/>
-  <path d="M680 262 C772 248 804 300 794 362 C782 434 724 474 640 492"/>
+<g transform="translate(0 -16)" fill="none" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="url(#handleL)" d="M300 224 H214 C174 224 152 252 154 296 C158 376 250 452 372 494"/>
+  <path stroke="url(#handleR)" d="M724 224 H810 C850 224 872 252 870 296 C866 376 774 452 652 494"/>
 </g></svg>
