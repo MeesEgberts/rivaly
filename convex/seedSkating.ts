@@ -40,6 +40,7 @@ async function upsertAthlete(
     shortName: string;
     nation: string;
     category: string;
+    imageUrl?: string;
   },
 ): Promise<Id<"athletes">> {
   const existing = await ctx.db
@@ -51,6 +52,11 @@ async function upsertAthlete(
   const match = existing.find((row) => row.category === athlete.category);
 
   if (match) {
+    // Een officiële foto vervangt een eerder gevonden foto.
+    if (athlete.imageUrl && match.imageUrl !== athlete.imageUrl) {
+      await ctx.db.patch("athletes", match._id, { imageUrl: athlete.imageUrl });
+    }
+
     return match._id;
   }
 
@@ -81,6 +87,7 @@ async function upsertSkaters(
         shortName: surname(skater.name),
         nation: skater.nation,
         category: skater.category,
+        imageUrl: skater.imageUrl,
       }),
     );
   }

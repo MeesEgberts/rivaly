@@ -1,5 +1,6 @@
 import type { SkatingCategory } from "../../modules/skating/categories";
 import { SHORTTRACK_FIELD, SPEEDSKATING_FIELD } from "./skatingFields2026";
+import { SPEEDSKATING_ISU_FIELD } from "./skatingFieldIsu";
 
 /**
  * Schaatsen en shorttrack, seizoen 2026/27: atleten per categorie en de
@@ -13,6 +14,8 @@ export interface SeedSkater {
   /** Landcode voor de vlag, bijv. "NED". */
   nation: string;
   category: SkatingCategory;
+  /** Officiële portretfoto, bijv. van de ISU. */
+  imageUrl?: string;
 }
 
 const men = (name: string, nation: string): SeedSkater => ({
@@ -124,23 +127,36 @@ const SHORTTRACK_FAVOURITES: SeedSkater[] = [
   women("Petra Jászapáti", "HUN"),
 ];
 
-/** Zonder dubbelen: dezelfde naam (hoofdletters negeren) in dezelfde categorie. */
+/**
+ * Zonder dubbelen: dezelfde naam (hoofdletters negeren) in dezelfde
+ * categorie. De eerste lijst wint; een foto uit een latere lijst vult aan.
+ */
 function merge(...lists: SeedSkater[][]): SeedSkater[] {
   const result = new Map<string, SeedSkater>();
 
   for (const skater of lists.flat()) {
     const key = `${skater.category}:${skater.name.toLowerCase()}`;
+    const existing = result.get(key);
 
-    if (!result.has(key)) {
+    if (!existing) {
       result.set(key, skater);
+      continue;
+    }
+
+    if (!existing.imageUrl && skater.imageUrl) {
+      result.set(key, { ...existing, imageUrl: skater.imageUrl });
     }
   }
 
   return [...result.values()];
 }
 
-/** Iedereen die we kennen: de favorieten plus het veld van 2026. */
-export const SPEEDSKATERS = merge(SPEEDSKATING_FAVOURITES, SPEEDSKATING_FIELD);
+/** Iedereen die we kennen: de favorieten, het veld van 2026 en het ISU-veld. */
+export const SPEEDSKATERS = merge(
+  SPEEDSKATING_FAVOURITES,
+  SPEEDSKATING_FIELD,
+  SPEEDSKATING_ISU_FIELD,
+);
 export const SHORTTRACKERS = merge(SHORTTRACK_FAVOURITES, SHORTTRACK_FIELD);
 
 /** Landen die een aflossingsploeg sturen, met hun Nederlandse naam. */
