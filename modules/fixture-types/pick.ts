@@ -21,6 +21,8 @@ export const optionValidator = v.object({
  */
 export const athletePoolValidator = v.object({
   sport: v.string(),
+  /** Alleen atleten uit dit land, bijv. "NED" voor "Beste Nederlander". */
+  nation: v.optional(v.string()),
 });
 
 /** Eén keuze uit een lijst: winnaar van een wedstrijd, kampioen, topscorer, bonusvraag. */

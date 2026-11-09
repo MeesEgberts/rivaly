@@ -9,7 +9,6 @@ import { useNow } from "@/hooks/use-now";
 import { useSavePrediction } from "@/hooks/use-save-prediction";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import { isAthletePool, orderToValue, slotCount } from "@/utils/athletes";
-import { describeContext } from "@/utils/fixture-text";
 import { isFixtureOpen } from "@/utils/match-rows";
 
 import { AthleteChoiceBody } from "./athlete-choice-body";
@@ -46,12 +45,7 @@ export function AthletePredictView({ fixture }: Props) {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}
       >
-        <PredictHeaderCard
-          title={fixture.label ?? "Voorspelling"}
-          context={describeContext(fixture)}
-          locksAt={fixture.locksAt}
-          isOpen={isOpen}
-        />
+        <PredictHeaderCard fixture={fixture} isOpen={isOpen} />
         {isOpen ? (
           <AthleteChoiceBody
             fixture={fixture}

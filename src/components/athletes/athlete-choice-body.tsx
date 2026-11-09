@@ -1,17 +1,19 @@
 import type { Href } from "expo-router";
 import { router } from "expo-router";
 import { useEffect, useMemo } from "react";
+import { StyleSheet, Text } from "react-native";
 
 import { Card } from "@/components/cards/card";
 import { SectionTitle } from "@/components/cards/section-title";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useAthleteDraft } from "@/hooks/use-athlete-draft";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import {
   athleteInfo,
-  athleteNoun,
   isAthletePool,
   isOther,
+  poolNoun,
   savedOrder,
   selectableFavourites,
   slotCount,
@@ -33,6 +35,7 @@ interface Props {
  * dan zoeken in alle atleten van de sport en de favorieten om snel te tikken.
  */
 export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
+  const colors = useAppColors();
   const draft = useAthleteDraft();
   const participants = useFixtureParticipants(fixture);
   const payload = fixture.payload;
@@ -60,7 +63,7 @@ export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
   }
 
   const size = slotCount(payload);
-  const noun = athleteNoun(payload.pool.sport);
+  const noun = poolNoun(payload.pool);
   const infoOf = (id: string) =>
     athleteInfo(id, draft.known, participants, payload);
   const slots = Array.from({ length: size }, (_, index) =>
@@ -79,7 +82,12 @@ export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
         onMoveUp={size > 1 ? draft.moveUp : undefined}
       />
 
-      {isFull ? null : (
+      {isFull ? (
+        <Text style={[styles.hint, { color: colors.secondaryLabel }]}>
+          Wissel een {noun.singular} door hem weg te halen; met de pijl schuif
+          je hem een plek omhoog.
+        </Text>
+      ) : (
         <SearchLinkCard
           title={`Zoek in alle ${noun.plural}`}
           onPress={() => router.push(searchHref)}
@@ -110,3 +118,7 @@ export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  hint: { fontSize: 13, lineHeight: 18, marginHorizontal: 4 },
+});

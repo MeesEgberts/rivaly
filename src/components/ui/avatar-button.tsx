@@ -24,7 +24,11 @@ export function AvatarButton() {
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
       {imageUrl ? (
-        <Image source={{ uri: imageUrl }} style={styles.image} transition={150} />
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          transition={150}
+        />
       ) : (
         <SymbolView name="person.crop.circle.fill" size={SIZE} />
       )}

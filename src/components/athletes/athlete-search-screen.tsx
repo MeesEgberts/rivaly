@@ -14,9 +14,9 @@ import type { AthleteInfo } from "@/types/athlete";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import {
   athleteInfo,
-  athleteNoun,
   isAthletePool,
   isOther,
+  poolNoun,
   selectableFavourites,
 } from "@/utils/athletes";
 import { capitalize } from "@/utils/format";
@@ -38,12 +38,14 @@ export function AthleteSearchScreen({ fixture, mode }: Props) {
   const participants = useFixtureParticipants(fixture);
   const [search, setSearch] = useState("");
   const payload = fixture.payload;
-  const sport = isAthletePool(payload) ? payload.pool.sport : "";
+  const pool = isAthletePool(payload) ? payload.pool : null;
   const term = search.trim();
 
   const results = useQuery(
     api.athletes.search,
-    term.length > 0 ? { sport, query: term } : "skip",
+    pool && term.length > 0
+      ? { sport: pool.sport, nation: pool.nation, query: term }
+      : "skip",
   );
 
   const athletes = useMemo<AthleteInfo[]>(() => {
@@ -69,7 +71,7 @@ export function AthleteSearchScreen({ fixture, mode }: Props) {
     return null;
   }
 
-  const noun = athleteNoun(sport);
+  const noun = poolNoun(payload.pool);
   const remaining = draft.size - draft.order.length;
 
   const choose = (athlete: AthleteInfo) => {

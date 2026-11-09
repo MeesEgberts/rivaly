@@ -68,10 +68,10 @@ export function AthleteResultForm({ fixture }: Props) {
       contentContainerStyle={styles.content}
     >
       <PredictHeaderCard
-        title={fixture.label ?? "Uitslag"}
-        context={current}
-        locksAt={fixture.locksAt}
+        fixture={fixture}
         isOpen={false}
+        fallbackTitle="Uitslag"
+        note={current}
       />
       <AthleteChoiceBody
         fixture={fixture}

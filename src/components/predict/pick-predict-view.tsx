@@ -9,7 +9,6 @@ import { isFixtureOpen } from "@/utils/match-rows";
 
 import { PredictHeaderCard } from "./predict-header-card";
 import { PredictLockedCard } from "./predict-locked-card";
-import { describeContext } from "@/utils/fixture-text";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import { TeamPickCard } from "./team-pick-card";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
@@ -62,10 +61,9 @@ export function PickPredictView({ fixture }: Props) {
         contentContainerStyle={styles.content}
       >
         <PredictHeaderCard
-          title={fixture.label ?? "Bonusvraag"}
-          context={describeContext(fixture)}
-          locksAt={fixture.locksAt}
+          fixture={fixture}
           isOpen={isOpen}
+          fallbackTitle="Bonusvraag"
         />
 
         {isOpen ? (

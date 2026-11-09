@@ -11,7 +11,6 @@ import { isFixtureOpen } from "@/utils/match-rows";
 import { clampNumeric, parseNumeric } from "@/utils/numeric";
 import { PredictHeaderCard } from "./predict-header-card";
 import { PredictLockedCard } from "./predict-locked-card";
-import { describeContext } from "@/utils/fixture-text";
 import type { FixtureDetail } from "@/types/fixture-detail";
 import { useSavePrediction } from "@/hooks/use-save-prediction";
 
@@ -69,10 +68,9 @@ export function NumericPredictView({ fixture }: Props) {
         contentContainerStyle={styles.content}
       >
         <PredictHeaderCard
-          title={fixture.label ?? "Bonusvraag"}
-          context={describeContext(fixture)}
-          locksAt={fixture.locksAt}
+          fixture={fixture}
           isOpen={isOpen}
+          fallbackTitle="Bonusvraag"
         />
 
         {isOpen ? (

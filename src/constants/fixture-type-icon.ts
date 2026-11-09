@@ -4,7 +4,7 @@ import type { FixtureTypeKey } from "@modules/types";
 
 export const FIXTURE_TYPE_ICON: Record<FixtureTypeKey, SFSymbol> = {
   score: "soccerball",
-  pick: "checkmark.circle",
+  pick: "person.fill",
   ranking: "list.number",
   numeric: "number",
   bracket: "trophy",

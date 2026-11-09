@@ -110,9 +110,13 @@ export async function assertAthletesInPool(
     const athleteId: Id<"athletes"> | null = ctx.db.normalizeId("athletes", id);
     const athlete = athleteId ? await ctx.db.get("athletes", athleteId) : null;
 
-    if (!athlete || athlete.sport !== payload.pool.sport) {
+    const wrongNation =
+      payload.pool.nation !== undefined &&
+      athlete?.nation !== payload.pool.nation;
+
+    if (!athlete || athlete.sport !== payload.pool.sport || wrongNation) {
       throw new ConvexError(
-        "Een van de gekozen atleten hoort niet bij deze sport.",
+        "Een van de gekozen atleten past niet bij deze vraag.",
       );
     }
   }

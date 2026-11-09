@@ -103,7 +103,7 @@ export default defineSchema({
     .index("by_sport_and_name", ["sport", "name"])
     .searchIndex("search_text", {
       searchField: "searchText",
-      filterFields: ["sport"],
+      filterFields: ["sport", "nation"],
     }),
 
   participants: defineTable({

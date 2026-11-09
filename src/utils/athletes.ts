@@ -143,3 +143,27 @@ export function athleteNoun(sport: string): {
     modules[sport]?.athleteNoun ?? { singular: "atleet", plural: "atleten" }
   );
 }
+
+/** Bijvoeglijke naamwoorden voor landen die in vragen voorkomen. */
+const NATION_ADJECTIVES: Record<string, string> = {
+  NED: "Nederlandse",
+  BEL: "Belgische",
+};
+
+/** "renners" of "Nederlandse renners", afhankelijk van de pool. */
+export function poolNoun(pool: { sport: string; nation?: string }): {
+  singular: string;
+  plural: string;
+} {
+  const noun = athleteNoun(pool.sport);
+  const adjective = pool.nation ? NATION_ADJECTIVES[pool.nation] : undefined;
+
+  if (!adjective) {
+    return noun;
+  }
+
+  return {
+    singular: `${adjective} ${noun.singular}`,
+    plural: `${adjective} ${noun.plural}`,
+  };
+}

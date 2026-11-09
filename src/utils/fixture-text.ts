@@ -132,3 +132,40 @@ function optionLabel(
 
   return participantName(participants, optionId);
 }
+
+/** "Milaan-Sanremo 2027 · Koers": waar de vraag bij hoort, zonder parcours. */
+export function describeOrigin(fixture: FixtureDetail): string {
+  return [fixture.eventName, fixture.stageName].filter(Boolean).join(" · ");
+}
+
+export interface DetailChip {
+  icon: "map" | "ruler" | "chart.xyaxis.line";
+  text: string;
+}
+
+/** Parcours als losse labels: route, afstand en soort rit. */
+export function detailChips(details: FixtureDetails | null): DetailChip[] {
+  if (!details) {
+    return [];
+  }
+
+  const chips: DetailChip[] = [];
+  const [start, finish] = details.route?.split(" – ") ?? [];
+
+  if (start && finish) {
+    chips.push({ icon: "map", text: `${start} → ${finish}` });
+  }
+
+  if (details.distanceKm !== undefined) {
+    chips.push({ icon: "ruler", text: `${details.distanceKm} km` });
+  }
+
+  if (details.profile) {
+    chips.push({
+      icon: "chart.xyaxis.line",
+      text: STAGE_PROFILES[details.profile].label,
+    });
+  }
+
+  return chips;
+}

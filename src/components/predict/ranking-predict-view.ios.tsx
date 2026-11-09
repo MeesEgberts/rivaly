@@ -76,10 +76,9 @@ export function RankingPredictView({ fixture }: RankingPredictViewProps) {
           contentContainerStyle={styles.content}
         >
           <PredictHeaderCard
-            title={fixture.label ?? "Volgorde"}
-            context={describeContext(fixture)}
-            locksAt={fixture.locksAt}
+            fixture={fixture}
             isOpen={false}
+            fallbackTitle="Volgorde"
           />
           <PredictLockedCard fixture={fixture} />
         </ScrollView>

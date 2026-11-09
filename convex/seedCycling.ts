@@ -92,24 +92,20 @@ async function upsertRiders(ctx: MutationCtx): Promise<RiderIds> {
   return ids;
 }
 
-/** Opties voor een keuze- of volgordevraag, met "Andere renner" achteraan. */
-function riderOptions(
-  riders: SeedRider[],
-  ids: RiderIds,
-  otherLabel = "Andere renner",
-) {
-  return [
-    ...riders.map((rider) => {
-      const id = ids.get(rider.name);
+/**
+ * Favorieten voor een vraag met een pool. Andere renners vind je via
+ * zoeken, dus een optie "Andere renner" is niet nodig.
+ */
+function riderOptions(riders: SeedRider[], ids: RiderIds) {
+  return riders.map((rider) => {
+    const id = ids.get(rider.name);
 
-      if (!id) {
-        throw new Error(`${rider.name} staat niet in de deelnemerslijst.`);
-      }
+    if (!id) {
+      throw new Error(`${rider.name} staat niet in de atletenlijst.`);
+    }
 
-      return { id, label: rider.name };
-    }),
-    { id: OTHER_OPTION_ID, label: otherLabel },
-  ];
+    return { id, label: rider.name };
+  });
 }
 
 async function eventExists(ctx: MutationCtx, slug: string): Promise<boolean> {
@@ -196,7 +192,8 @@ async function insertClassic(
       label: "Beste Nederlander",
       payload: {
         type: "pick",
-        options: riderOptions(dutchRiders, riderIds, "Andere Nederlander"),
+        options: riderOptions(dutchRiders, riderIds),
+        pool: { sport: SPORT, nation: "NED" },
       },
     });
   }
