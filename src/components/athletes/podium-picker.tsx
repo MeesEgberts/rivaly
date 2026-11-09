@@ -15,6 +15,8 @@ interface Props {
   title: string;
   slots: Slots;
   infoOf: (id: string) => AthleteInfo;
+  /** "renner", "schaatser" of "ploeg". */
+  noun: string;
   /** Tik op een plek: open het keuzescherm (kiezen of vervangen). */
   onOpen: (position: number) => void;
   onSwap: (from: number, to: number) => void;
@@ -25,7 +27,14 @@ interface Props {
  * eerstvolgende lege plek in blauw. Tik een plek om een renner te kiezen of
  * te vervangen. Bij één keuze is het één vak.
  */
-export function PodiumPicker({ title, slots, infoOf, onOpen, onSwap }: Props) {
+export function PodiumPicker({
+  title,
+  slots,
+  infoOf,
+  noun,
+  onOpen,
+  onSwap,
+}: Props) {
   const colors = useAppColors();
   const size = slots.length;
   const layout = useMemo(() => podiumLayout(size), [size]);
@@ -76,6 +85,7 @@ export function PodiumPicker({ title, slots, infoOf, onOpen, onSwap }: Props) {
             athlete={slots[0] ? infoOf(slots[0]) : null}
             isActive={next === 0}
             onPress={() => onOpen(0)}
+            noun={noun}
           />
         ) : (
           <View style={styles.podium}>
@@ -112,7 +122,7 @@ export function PodiumPicker({ title, slots, infoOf, onOpen, onSwap }: Props) {
         )}
 
         <Text style={[styles.footnote, { color: colors.tertiaryLabel }]}>
-          {podiumHint(filled, size)}
+          {podiumHint(filled, size, noun)}
         </Text>
       </View>
     </Card>

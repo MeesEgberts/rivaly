@@ -212,19 +212,15 @@ export function stepHeight(position: number, size: number): number {
 }
 
 /** Uitleg onder het podium, afhankelijk van hoe ver je bent. */
-export function podiumHint(filled: number, size: number): string {
+export function podiumHint(filled: number, size: number, noun: string): string {
   if (size === 1) {
     return filled === 0
-      ? "Tik om een renner te kiezen."
-      : "Tik om een andere renner te kiezen.";
-  }
-
-  if (filled === 0) {
-    return "Tik een plek om een renner te kiezen.";
+      ? `Tik om een ${noun} te kiezen.`
+      : `Tik om een andere ${noun} te kiezen.`;
   }
 
   if (filled < size) {
-    return "Tik een plek om een renner te kiezen.";
+    return `Tik een plek om een ${noun} te kiezen.`;
   }
 
   return "Tik om te vervangen, houd vast om te verslepen.";

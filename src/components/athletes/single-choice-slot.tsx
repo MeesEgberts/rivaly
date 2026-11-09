@@ -9,10 +9,11 @@ interface Props {
   athlete: AthleteInfo | null;
   isActive: boolean;
   onPress: () => void;
+  noun: string;
 }
 
 /** Eén keuze (trui, beste Nederlander): de gekozen renner groot, of een leeg vak. */
-export function SingleChoiceSlot({ athlete, isActive, onPress }: Props) {
+export function SingleChoiceSlot({ athlete, isActive, onPress, noun }: Props) {
   const colors = useAppColors();
 
   return (
@@ -47,7 +48,7 @@ export function SingleChoiceSlot({ athlete, isActive, onPress }: Props) {
             tintColor={colors.accent as string}
           />
           <Text style={[styles.empty, { color: colors.accent }]}>
-            Kies je renner
+            Kies je {noun}
           </Text>
         </View>
       )}

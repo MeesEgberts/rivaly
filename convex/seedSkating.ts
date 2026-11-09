@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import {
   isRelayCategory,
   SKATING_FORMAT_ICONS,
+  skatingQuestionLabel,
   skatingFormat,
 } from "../modules/skating/categories";
 import { skatingStageKinds } from "../modules/skating/module";
@@ -123,15 +124,8 @@ function favouriteOptions(
   });
 }
 
-const FORMAT_LABELS: Record<string, string> = {
-  massstart: "Massastart",
-  relay: "Aflossing",
-  sprint: "Sprintklassement",
-  allround: "Allroundklassement",
-};
-
 function distanceLabel(distance: SeedDistance): string {
-  return distance.format ? FORMAT_LABELS[distance.format] : "Podium";
+  return skatingQuestionLabel(distance);
 }
 
 function distanceDetails(distance: SeedDistance) {

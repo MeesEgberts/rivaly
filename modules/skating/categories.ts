@@ -5,12 +5,21 @@
  * `figure` is een SF Symbol: een man, een vrouw, of beide bij gemengd.
  */
 export const SKATING_CATEGORIES = {
-  men: { label: "Mannen", figure: "figure.stand" },
-  women: { label: "Vrouwen", figure: "figure.stand.dress" },
-  relayMen: { label: "Aflossing mannen", figure: "figure.stand" },
-  relayWomen: { label: "Aflossing vrouwen", figure: "figure.stand.dress" },
+  men: { label: "Mannen", short: "mannen", figure: "figure.stand" },
+  women: { label: "Vrouwen", short: "vrouwen", figure: "figure.stand.dress" },
+  relayMen: {
+    label: "Aflossing mannen",
+    short: "mannen",
+    figure: "figure.stand",
+  },
+  relayWomen: {
+    label: "Aflossing vrouwen",
+    short: "vrouwen",
+    figure: "figure.stand.dress",
+  },
   relayMixed: {
     label: "Aflossing gemengd",
+    short: "gemengd",
     figure: "figure.stand.dress.line.vertical.figure",
   },
 } as const;
@@ -48,3 +57,38 @@ export const SKATING_FORMAT_ICONS: Record<SkatingFormat, string> = {
   sprint: "bolt.fill",
   allround: "list.number",
 };
+
+/** "500 m", "Massastart", "Aflossing 2.000 m", "Sprintklassement". */
+export function distanceName(details: {
+  distanceM?: number;
+  format?: string;
+}): string {
+  const format = skatingFormat(details.format);
+  const meters = details.distanceM;
+
+  switch (format) {
+    case "massstart":
+      return "Massastart";
+    case "sprint":
+      return "Sprintklassement";
+    case "allround":
+      return "Allroundklassement";
+    case "relay":
+      return meters ? `Aflossing ${formatDistance(meters)}` : "Aflossing";
+    case "distance":
+      return meters ? formatDistance(meters) : "Afstand";
+  }
+}
+
+/** Naam van de vraag, overal in de app: "500 m vrouwen", "Massastart mannen". */
+export function skatingQuestionLabel(details: {
+  distanceM?: number;
+  format?: string;
+  category: string;
+}): string {
+  const category = isSkatingCategory(details.category)
+    ? SKATING_CATEGORIES[details.category].short
+    : "";
+
+  return [distanceName(details), category].filter(Boolean).join(" ");
+}

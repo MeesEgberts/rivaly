@@ -7,6 +7,7 @@ import type { FixtureDetail } from "@/types/fixture-detail";
 import {
   athleteInfo,
   isAthletePool,
+  poolNoun,
   savedOrder,
   slotCount,
 } from "@/utils/athletes";
@@ -59,6 +60,7 @@ export function AthleteChoiceBody({ fixture, mode }: Props) {
         title={title}
         slots={draft.slots}
         infoOf={infoOf}
+        noun={poolNoun(payload.pool).singular}
         onOpen={(position) =>
           router.push({
             pathname:

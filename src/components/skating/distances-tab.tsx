@@ -51,6 +51,7 @@ export function DistancesTab({ eventId }: Props) {
 
     return toSkatingDistances(
       fixturesOfKind(event.stages, fixtures, skatingStageKinds.distances),
+      event.moduleKey,
       now,
     );
   }, [event, fixtures, now]);
@@ -106,6 +107,7 @@ export function DistancesTab({ eventId }: Props) {
             renderItem={({ item }) => (
               <DistancePage
                 distance={item}
+                sport={event?.moduleKey ?? "speedskating"}
                 width={width}
                 participants={participants}
                 now={now}

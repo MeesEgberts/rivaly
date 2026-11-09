@@ -26,3 +26,17 @@ describe("schaatsen", () => {
     expect(isRelayCategory("women")).toBe(false);
   });
 });
+
+describe("ronden", () => {
+  it("rekent afstanden om naar ronden op de baan", async () => {
+    const { formatLaps, lapsOf } = await import("./distance-info");
+
+    expect(formatLaps(lapsOf("speedskating", { distanceM: 500 })!)).toBe("1¼");
+    expect(formatLaps(lapsOf("speedskating", { distanceM: 5000 })!)).toBe(
+      "12½",
+    );
+    expect(formatLaps(lapsOf("shorttrack", { distanceM: 500 })!)).toBe("4½");
+    expect(lapsOf("speedskating", { format: "massstart" })).toBe(16);
+    expect(lapsOf("speedskating", { format: "allround" })).toBeNull();
+  });
+});

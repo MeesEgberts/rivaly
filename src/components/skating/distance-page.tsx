@@ -8,16 +8,23 @@ import { DistanceCard } from "./distance-card";
 
 interface Props {
   distance: SkatingDistance;
+  sport: string;
   width: number;
   participants: ParticipantMap;
   now: number;
 }
 
 /** Eén afstand als pagina in de swipebare rij: kop, jouw podium en de uitslag. */
-export function DistancePage({ distance, width, participants, now }: Props) {
+export function DistancePage({
+  distance,
+  sport,
+  width,
+  participants,
+  now,
+}: Props) {
   return (
     <View style={[styles.content, { width }]}>
-      <DistanceCard distance={distance} now={now} />
+      <DistanceCard distance={distance} sport={sport} now={now} />
       <RankingPodium
         fixture={distance.fixture}
         status={distance.status}
