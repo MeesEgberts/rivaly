@@ -21,6 +21,7 @@ import {
 import { recomputeStandings } from "./lib/standings";
 
 const MAX_EVENTS_PER_POULE = 20;
+const MAX_MEMBERS_COUNTED = 200;
 
 async function eventsForPoule(
   ctx: QueryCtx | MutationCtx,
@@ -232,6 +233,9 @@ export const listMine = query({
       points: number;
       rank: number;
       eventNames: string[];
+      /** Sporten in deze poule, zonder dubbelen, voor de iconen op de kaart. */
+      moduleKeys: string[];
+      memberCount: number;
     }[] = [];
 
     for (const membership of memberships) {
@@ -249,6 +253,10 @@ export const listMine = query({
         .unique();
 
       const events = await eventsForPoule(ctx, poule._id);
+      const members = await ctx.db
+        .query("pouleMembers")
+        .withIndex("by_poule", (q) => q.eq("pouleId", poule._id))
+        .take(MAX_MEMBERS_COUNTED);
 
       result.push({
         _id: poule._id,
@@ -258,6 +266,8 @@ export const listMine = query({
         points: standing?.points ?? 0,
         rank: standing?.rank ?? 0,
         eventNames: events.map((event) => event.name),
+        moduleKeys: [...new Set(events.map((event) => event.moduleKey))],
+        memberCount: members.length,
       });
     }
 

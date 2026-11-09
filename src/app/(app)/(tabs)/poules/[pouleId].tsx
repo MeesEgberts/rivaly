@@ -1,18 +1,24 @@
 import { useQuery } from "convex/react";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { Platform, Share } from "react-native";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { Platform, ScrollView, Share, StyleSheet } from "react-native";
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { SectionTitle } from "@/components/cards/section-title";
 import { LoadingScreen } from "@/components/loading-screen";
-import { NavRow } from "@/components/ui/nav-row";
-import { Screen, Section } from "@/components/ui/screen";
+import { InviteCard } from "@/components/poule/invite-card";
+import { MembersCard } from "@/components/poule/members-card";
+import { PouleHeroCard } from "@/components/poule/poule-hero-card";
+import { ProgramCard } from "@/components/poule/program-card";
+import { StandingsCard } from "@/components/poule/standings-card";
+import { StandingsPodium } from "@/components/poule/standings-podium";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { formatInviteCode } from "@/utils/format";
-import { roleLabel } from "@/utils/poule-text";
-import { moduleIcon } from "@/utils/sport-icon";
 
+/** Eén poule: kop met jouw plek, stand met podium, programma, leden en uitnodigen. */
 export default function PouleScreen() {
   const { pouleId } = useLocalSearchParams<{ pouleId: Id<"poules"> }>();
+  const colors = useAppColors();
   const poule = useQuery(api.poules.get, { pouleId });
   const standings = useQuery(api.poules.standings, { pouleId });
   const members = useQuery(api.poules.members, { pouleId });
@@ -22,6 +28,7 @@ export default function PouleScreen() {
   }
 
   const inviteCode = formatInviteCode(poule.inviteCode);
+  const me = standings.find((row) => row.isMe) ?? null;
 
   const share = () => {
     Share.share({
@@ -46,52 +53,29 @@ export default function PouleScreen() {
         </Stack.Toolbar.Button>
       </Stack.Toolbar>
 
-      <Screen>
-        <Section title="Stand">
-          {standings.map((row) => (
-            <NavRow
-              key={row.userId}
-              leadingText={`${row.rank}`}
-              title={row.isMe ? `${row.name} (jij)` : row.name}
-              subtitle={`${row.exact}× exact · ${row.predicted} gescoord`}
-              value={`${row.points} pt`}
-              highlighted={row.isMe}
-            />
-          ))}
-        </Section>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={{ backgroundColor: colors.background }}
+        contentContainerStyle={styles.content}
+      >
+        <PouleHeroCard poule={poule} me={me} memberCount={members.length} />
 
-        <Section title="Programma">
-          {poule.events.map((event) => (
-            <NavRow
-              key={event._id}
-              icon={moduleIcon(event.moduleKey)}
-              title={event.name}
-              subtitle={`${event.moduleName} · ${event.presetName}`}
-              onPress={() => router.push(`/events/${event._id}`)}
-            />
-          ))}
-        </Section>
+        <SectionTitle>Stand</SectionTitle>
+        <StandingsPodium rows={standings} />
+        <StandingsCard rows={standings} />
 
-        <Section title={`Leden (${members.length})`}>
-          {members.map((member) => (
-            <NavRow
-              key={member.userId}
-              icon={member.role === "owner" ? "crown" : "person"}
-              title={member.isMe ? `${member.name} (jij)` : member.name}
-              value={roleLabel(member.role)}
-            />
-          ))}
-        </Section>
+        <SectionTitle>Programma</SectionTitle>
+        <ProgramCard events={poule.events} />
 
-        <Section title="Uitnodigen">
-          <NavRow
-            icon="person.badge.plus"
-            title={inviteCode}
-            subtitle="Tik om de code te delen"
-            onPress={share}
-          />
-        </Section>
-      </Screen>
+        <SectionTitle>{`Leden (${members.length})`}</SectionTitle>
+        <MembersCard members={members} />
+
+        <InviteCard code={inviteCode} onShare={share} />
+      </ScrollView>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  content: { padding: 16, gap: 12, paddingBottom: 120 },
+});

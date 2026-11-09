@@ -31,7 +31,9 @@ export const save = mutation({
     const now = Date.now();
 
     if (fixture.status !== "scheduled" || now >= fixture.locksAt) {
-      throw new ConvexError("Dit onderdeel is gesloten. Voorspellen kan niet meer.");
+      throw new ConvexError(
+        "Dit onderdeel is gesloten. Voorspellen kan niet meer.",
+      );
     }
 
     assertPredictionFits(fixture.payload, args.payload);
@@ -84,11 +86,13 @@ export const open = query({
       fixtureId: Id<"fixtures">;
       eventId: Id<"events">;
       eventName: string;
+      moduleKey: string;
       type: Doc<"fixtures">["type"];
       label: string | null;
       startsAt: number;
       locksAt: number;
       payload: Doc<"fixtures">["payload"];
+      details: NonNullable<Doc<"fixtures">["details"]> | null;
       hasPrediction: boolean;
     }[] = [];
 
@@ -122,19 +126,19 @@ export const open = query({
           fixtureId: fixture._id,
           eventId,
           eventName: event.name,
+          moduleKey: event.moduleKey,
           type: fixture.type,
           label: fixture.label ?? null,
           startsAt: fixture.startsAt,
           locksAt: fixture.locksAt,
           payload: fixture.payload,
+          details: fixture.details ?? null,
           hasPrediction: prediction !== null,
         });
       }
     }
 
-    return items
-      .sort((a, b) => a.locksAt - b.locksAt)
-      .slice(0, MAX_OPEN_TOTAL);
+    return items.sort((a, b) => a.locksAt - b.locksAt).slice(0, MAX_OPEN_TOTAL);
   },
 });
 
@@ -143,7 +147,11 @@ export const open = query({
  * sluiting, of altijd als de poule dat zo heeft ingesteld.
  */
 export const forFixtureInPoule = query({
-  args: { pouleId: v.id("poules"), fixtureId: v.id("fixtures"), now: v.number() },
+  args: {
+    pouleId: v.id("poules"),
+    fixtureId: v.id("fixtures"),
+    now: v.number(),
+  },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     await requireMembership(ctx, args.pouleId, user._id);
@@ -156,7 +164,8 @@ export const forFixtureInPoule = query({
     }
 
     const revealed =
-      poule.settings.revealPredictions === "always" || args.now >= fixture.locksAt;
+      poule.settings.revealPredictions === "always" ||
+      args.now >= fixture.locksAt;
 
     if (!revealed) {
       return { revealed: false as const, predictions: [] };
@@ -242,6 +251,7 @@ export const overview = query({
     const rows: {
       eventId: Id<"events">;
       name: string;
+      moduleKey: string;
       open: number;
       predicted: number;
       nextLockAt: number | null;
@@ -269,7 +279,10 @@ export const overview = query({
         .take(MAX_FIXTURES_PER_EVENT);
 
       const predictionByFixture = new Map(
-        predictions.map((prediction) => [prediction.fixtureId, prediction.payload]),
+        predictions.map((prediction) => [
+          prediction.fixtureId,
+          prediction.payload,
+        ]),
       );
 
       let open = 0;
@@ -283,7 +296,12 @@ export const overview = query({
 
         open += 1;
 
-        if (isCompletePrediction(fixture.payload, predictionByFixture.get(fixture._id))) {
+        if (
+          isCompletePrediction(
+            fixture.payload,
+            predictionByFixture.get(fixture._id),
+          )
+        ) {
           predicted += 1;
           continue;
         }
@@ -293,7 +311,14 @@ export const overview = query({
         }
       }
 
-      rows.push({ eventId, name: event.name, open, predicted, nextLockAt });
+      rows.push({
+        eventId,
+        name: event.name,
+        moduleKey: event.moduleKey,
+        open,
+        predicted,
+        nextLockAt,
+      });
     }
 
     return rows.sort(

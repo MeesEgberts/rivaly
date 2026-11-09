@@ -1,59 +1,48 @@
-import { useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { router } from "expo-router";
-import { useMemo } from "react";
 
-import { api } from "@convex/_generated/api";
-import { NavRow } from "@/components/ui/nav-row";
-import { Section } from "@/components/ui/screen";
-import { useNow } from "@/hooks/use-now";
-import { formatDateTime } from "@/utils/format";
+import { Card } from "@/components/cards/card";
+import { CardRow } from "@/components/cards/card-row";
+import { Chip } from "@/components/cards/chip";
+import { SectionTitle } from "@/components/cards/section-title";
+import { QuestionVisual } from "@/components/cards/question-visual";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { isSoon, openItemHref, type OpenItem } from "@/utils/home";
+import { formatTimeLeft } from "@/utils/prediction-cards";
 
-import { FIXTURE_TYPE_ICON } from "@/constants/fixture-type-icon";
+interface Props {
+  items: OpenItem[];
+  now: number;
+}
 
-const MAX_ITEMS = 5;
+/** De volgende onderdelen die je nog moet invullen, met hoe lang je nog hebt. */
+export function ClosingSoonSection({ items, now }: Props) {
+  const colors = useAppColors();
 
-type OpenItem = FunctionReturnType<typeof api.predictions.open>[number];
-
-/** De eerstvolgende onderdelen die je nog niet hebt ingevuld. */
-export function ClosingSoonSection() {
-  const now = useNow();
-  const items = useQuery(api.predictions.open, { now });
-
-  const todo = useMemo(
-    () =>
-      (items ?? []).filter((item) => !item.hasPrediction).slice(0, MAX_ITEMS),
-    [items],
-  );
-
-  const openFixture = (item: OpenItem) => {
-    // Een schema vul je in op het toernooischerm, de rest in het voorspelscherm.
-    if (item.type === "bracket") {
-      router.push({
-        pathname: "/events/[eventId]",
-        params: { eventId: item.eventId, tab: "bracket" },
-      });
-      return;
-    }
-
-    router.push(`/predict/${item.fixtureId}`);
-  };
-
-  if (todo.length === 0) {
+  if (items.length === 0) {
     return null;
   }
 
   return (
-    <Section title="Sluit binnenkort">
-      {todo.map((item) => (
-        <NavRow
-          key={item.fixtureId}
-          icon={FIXTURE_TYPE_ICON[item.type]}
-          title={item.label ?? "Onderdeel"}
-          subtitle={`${item.eventName} · sluit ${formatDateTime(item.locksAt)}`}
-          onPress={() => openFixture(item)}
-        />
-      ))}
-    </Section>
+    <>
+      <SectionTitle>Daarna</SectionTitle>
+      <Card isFlush>
+        {items.map((item, index) => (
+          <CardRow
+            key={item.fixtureId}
+            leading={<QuestionVisual type={item.type} details={item.details} />}
+            title={item.label ?? "Onderdeel"}
+            subtitle={item.eventName}
+            trailing={
+              <Chip
+                text={formatTimeLeft(item.locksAt, now)}
+                tint={isSoon(item.locksAt, now) ? colors.accent : undefined}
+              />
+            }
+            onPress={() => router.push(openItemHref(item))}
+            isLast={index === items.length - 1}
+          />
+        ))}
+      </Card>
+    </>
   );
 }
