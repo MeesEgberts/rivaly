@@ -1,11 +1,9 @@
 import type { Href } from "expo-router";
 import { router } from "expo-router";
 import { useEffect, useMemo } from "react";
-import { StyleSheet, Text } from "react-native";
 
 import { Card } from "@/components/cards/card";
 import { SectionTitle } from "@/components/cards/section-title";
-import { useAppColors } from "@/hooks/use-app-colors";
 import { useAthleteDraft } from "@/hooks/use-athlete-draft";
 import { useFixtureParticipants } from "@/hooks/use-fixture-participants";
 import type { FixtureDetail } from "@/types/fixture-detail";
@@ -13,6 +11,7 @@ import {
   athleteInfo,
   isAthletePool,
   isOther,
+  placeLabel,
   poolNoun,
   savedOrder,
   selectableFavourites,
@@ -21,7 +20,7 @@ import {
 
 import { AthleteRow } from "./athlete-row";
 import { SearchLinkCard } from "./search-link-card";
-import { SelectionCard } from "./selection-card";
+import { TopNCard } from "./top-n-card";
 
 interface Props {
   fixture: FixtureDetail;
@@ -35,7 +34,6 @@ interface Props {
  * dan zoeken in alle atleten van de sport en de favorieten om snel te tikken.
  */
 export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
-  const colors = useAppColors();
   const draft = useAthleteDraft();
   const participants = useFixtureParticipants(fixture);
   const payload = fixture.payload;
@@ -66,35 +64,28 @@ export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
   const noun = poolNoun(payload.pool);
   const infoOf = (id: string) =>
     athleteInfo(id, draft.known, participants, payload);
-  const slots = Array.from({ length: size }, (_, index) =>
-    draft.order[index] ? infoOf(draft.order[index]) : null,
-  );
-  const isFull = size > 1 && draft.order.length >= size;
   const prefix = mode === "prediction" ? "Jouw" : "Uitslag";
   const title = size > 1 ? `${prefix} top ${size}` : `${prefix} keuze`;
 
   return (
     <>
-      <SelectionCard
+      <TopNCard
         title={title}
-        slots={slots}
+        order={draft.order}
+        size={size}
+        noun={noun.singular}
+        infoOf={infoOf}
         onRemove={draft.remove}
-        onMoveUp={size > 1 ? draft.moveUp : undefined}
+        onReorder={draft.reorder}
+        onPickSlot={() => router.push(searchHref)}
       />
 
-      {isFull ? (
-        <Text style={[styles.hint, { color: colors.secondaryLabel }]}>
-          Wissel een {noun.singular} door hem weg te halen; met de pijl schuif
-          je hem een plek omhoog.
-        </Text>
-      ) : (
-        <SearchLinkCard
-          title={`Zoek in alle ${noun.plural}`}
-          onPress={() => router.push(searchHref)}
-        />
-      )}
+      <SearchLinkCard
+        title={`Zoek in alle ${noun.plural}`}
+        onPress={() => router.push(searchHref)}
+      />
 
-      {favourites.length > 0 && !isFull ? (
+      {favourites.length > 0 ? (
         <>
           <SectionTitle>Favorieten</SectionTitle>
           <Card isFlush>
@@ -102,9 +93,9 @@ export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
               <AthleteRow
                 key={option.id}
                 athlete={infoOf(option.id)}
-                isChosen={draft.order.includes(option.id)}
+                place={placeLabel(option.id, draft.order, size)}
                 onPress={() =>
-                  draft.add(
+                  draft.toggle(
                     infoOf(option.id),
                     mode === "result" && isOther(option.id),
                   )
@@ -118,7 +109,3 @@ export function AthleteChoiceBody({ fixture, mode, searchHref }: Props) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  hint: { fontSize: 13, lineHeight: 18, marginHorizontal: 4 },
-});

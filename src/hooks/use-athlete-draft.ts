@@ -15,7 +15,10 @@ export interface AthleteDraft {
   /** Voegt toe (of vervangt bij één plek). `allowRepeat` voor "Andere renner" in een uitslag. */
   add: (athlete: AthleteInfo, allowRepeat?: boolean) => void;
   remove: (index: number) => void;
-  moveUp: (index: number) => void;
+  /** Nieuwe volgorde na slepen. */
+  reorder: (order: string[]) => void;
+  /** Haalt een atleet weg als hij gekozen is, anders voegt hij hem toe. */
+  toggle: (athlete: AthleteInfo, allowRepeat?: boolean) => void;
 }
 
 export const AthleteDraftContext = createContext<AthleteDraft | null>(null);

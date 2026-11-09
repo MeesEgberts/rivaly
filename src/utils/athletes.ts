@@ -75,16 +75,6 @@ export function addToOrder(
   return [...order, id];
 }
 
-export function moveUp(order: string[], index: number): string[] {
-  if (index <= 0 || index >= order.length) {
-    return order;
-  }
-
-  const next = [...order];
-  [next[index - 1], next[index]] = [next[index], next[index - 1]];
-  return next;
-}
-
 /**
  * Favorieten die je mag kiezen. "Andere renner" alleen in een uitslag of bij
  * een keuzevraag; in een voorspelde volgorde levert hij nooit punten op.
@@ -166,4 +156,71 @@ export function poolNoun(pool: { sport: string; nation?: string }): {
     singular: `${adjective} ${noun.singular}`,
     plural: `${adjective} ${noun.plural}`,
   };
+}
+
+/**
+ * Wat er rechts bij een atleet in de lijst staat: zijn plek als hij gekozen
+ * is, anders de plek waar hij terechtkomt (of niets als alles vol is).
+ */
+export function placeLabel(
+  id: string,
+  order: string[],
+  size: number,
+): { text: string; isChosen: boolean } | null {
+  const index = order.indexOf(id);
+
+  if (index >= 0) {
+    return { text: size > 1 ? `Plek ${index + 1}` : "Gekozen", isChosen: true };
+  }
+
+  if (size === 1) {
+    return { text: "Kies", isChosen: false };
+  }
+
+  if (order.length >= size) {
+    return null;
+  }
+
+  return { text: `Plek ${order.length + 1}`, isChosen: false };
+}
+
+/** Uitleg onder de top N, afhankelijk van hoe ver je bent. */
+export function topNHint(filled: number, size: number, noun: string): string {
+  if (size === 1) {
+    return filled === 0
+      ? `Tik een ${noun} hieronder aan of zoek in de hele lijst.`
+      : `Tik een andere ${noun} aan om te wisselen.`;
+  }
+
+  if (filled === 0) {
+    return `Tik een ${noun} hieronder aan: hij komt op plek 1.`;
+  }
+
+  const drag = `Sleep aan ≡ om de volgorde te wijzigen.`;
+
+  if (filled === 1) {
+    return `Volgende ${noun} komt op plek 2.`;
+  }
+
+  if (filled < size) {
+    return `Volgende ${noun} komt op plek ${filled + 1}. ${drag}`;
+  }
+
+  return drag;
+}
+
+/** Maten van de native plekkenlijst op iOS, gemeten in de simulator. */
+export const SLOT_LIST = {
+  rowHeight: 58,
+  /** Ruimte die SwiftUI boven een sectie zonder kop houdt. */
+  topInset: 34,
+  bottomInset: 16,
+  /** Hoe ver de inset-grouped lijst inspringt ten opzichte van onze kaarten. */
+  sideInset: 17,
+} as const;
+
+export function slotListHeight(slots: number): number {
+  return (
+    SLOT_LIST.topInset + slots * SLOT_LIST.rowHeight + SLOT_LIST.bottomInset
+  );
 }

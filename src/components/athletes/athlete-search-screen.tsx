@@ -16,6 +16,7 @@ import {
   athleteInfo,
   isAthletePool,
   isOther,
+  placeLabel,
   poolNoun,
   selectableFavourites,
 } from "@/utils/athletes";
@@ -75,10 +76,11 @@ export function AthleteSearchScreen({ fixture, mode }: Props) {
   const remaining = draft.size - draft.order.length;
 
   const choose = (athlete: AthleteInfo) => {
-    draft.add(athlete, mode === "result" && isOther(athlete.id));
+    const wasChosen = draft.order.includes(athlete.id);
+    draft.toggle(athlete, mode === "result" && isOther(athlete.id));
 
     // Klaar als er één plek is of de laatste plek nu gevuld is.
-    if (draft.size === 1 || remaining <= 1) {
+    if (!wasChosen && (draft.size === 1 || remaining <= 1)) {
       router.back();
     }
   };
@@ -118,7 +120,7 @@ export function AthleteSearchScreen({ fixture, mode }: Props) {
                 <AthleteRow
                   key={athlete.id}
                   athlete={athlete}
-                  isChosen={draft.order.includes(athlete.id)}
+                  place={placeLabel(athlete.id, draft.order, draft.size)}
                   onPress={() => choose(athlete)}
                   isLast={index === athletes.length - 1}
                 />

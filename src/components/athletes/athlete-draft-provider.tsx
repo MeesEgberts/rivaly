@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { AthleteDraftContext } from "@/hooks/use-athlete-draft";
 import type { AthleteInfo } from "@/types/athlete";
-import { addToOrder, moveUp as moveUpInOrder } from "@/utils/athletes";
+import { addToOrder } from "@/utils/athletes";
 
 interface Props {
   children: ReactNode;
@@ -34,13 +34,35 @@ export function AthleteDraftProvider({ children }: Props) {
     setOrder((current) => current.filter((_, position) => position !== index));
   }, []);
 
-  const moveUp = useCallback((index: number) => {
-    setOrder((current) => moveUpInOrder(current, index));
+  const reorder = useCallback((next: string[]) => {
+    setOrder(next);
   }, []);
 
+  const toggle = useCallback(
+    (athlete: AthleteInfo, allowRepeat = false) => {
+      if (!allowRepeat && order.includes(athlete.id)) {
+        setOrder((current) => current.filter((id) => id !== athlete.id));
+        return;
+      }
+
+      add(athlete, allowRepeat);
+    },
+    [order, add],
+  );
+
   const draft = useMemo(
-    () => ({ order, size, known, isStarted, start, add, remove, moveUp }),
-    [order, size, known, isStarted, start, add, remove, moveUp],
+    () => ({
+      order,
+      size,
+      known,
+      isStarted,
+      start,
+      add,
+      remove,
+      reorder,
+      toggle,
+    }),
+    [order, size, known, isStarted, start, add, remove, reorder, toggle],
   );
 
   return (
