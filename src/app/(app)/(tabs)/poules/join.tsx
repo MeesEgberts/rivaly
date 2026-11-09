@@ -9,6 +9,7 @@ import { NavRow } from "@/components/ui/nav-row";
 import { ModalToolbar } from "@/components/ui/modal-toolbar";
 import { Screen, Section } from "@/components/ui/screen";
 import { showError } from "@/utils/error-message";
+import { moduleIcon } from "@/utils/sport-icon";
 
 export default function JoinScreen() {
   const params = useLocalSearchParams<{ code?: string }>();
@@ -66,7 +67,7 @@ export default function JoinScreen() {
           {preview.events.map((event) => (
             <NavRow
               key={event.name}
-              icon="sportscourt"
+              icon={moduleIcon(event.moduleKey)}
               title={event.name}
               subtitle={event.moduleName}
             />

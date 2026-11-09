@@ -57,7 +57,7 @@ export default function ChooseEventsScreen() {
           accessibilityLabel="Filter op sport"
         >
           <Stack.Toolbar.MenuAction
-            icon="sportscourt"
+            icon="square.grid.2x2"
             isOn={sportKey === null}
             onPress={() => setSportKey(null)}
           >

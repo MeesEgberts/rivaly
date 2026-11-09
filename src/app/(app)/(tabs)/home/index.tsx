@@ -21,7 +21,7 @@ export default function HomeScreen() {
       <Screen>
         <Section>
           <EmptyState
-            icon="sportscourt"
+            icon="target"
             title="Niets te voorspellen"
             description="Maak een poule of doe mee met een code via het tabblad Poules."
           />

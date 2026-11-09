@@ -2,19 +2,30 @@ import { ConvexError, v } from "convex/values";
 
 import { getModule, getPreset } from "../modules/registry";
 import type { Doc, Id } from "./_generated/dataModel";
-import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import {
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import {
   getMembership,
   requireMembership,
   requirePouleAdmin,
   requireUser,
 } from "./lib/auth";
-import { generateUniqueInviteCode, normalizeInviteCode } from "./lib/inviteCode";
+import {
+  generateUniqueInviteCode,
+  normalizeInviteCode,
+} from "./lib/inviteCode";
 import { recomputeStandings } from "./lib/standings";
 
 const MAX_EVENTS_PER_POULE = 20;
 
-async function eventsForPoule(ctx: QueryCtx | MutationCtx, pouleId: Id<"poules">) {
+async function eventsForPoule(
+  ctx: QueryCtx | MutationCtx,
+  pouleId: Id<"poules">,
+) {
   const links = await ctx.db
     .query("pouleEvents")
     .withIndex("by_poule", (q) => q.eq("pouleId", pouleId))
@@ -79,7 +90,9 @@ export const create = mutation({
     }
 
     if (args.eventIds.length > MAX_EVENTS_PER_POULE) {
-      throw new ConvexError(`Een poule kan maximaal ${MAX_EVENTS_PER_POULE} evenementen bevatten.`);
+      throw new ConvexError(
+        `Een poule kan maximaal ${MAX_EVENTS_PER_POULE} evenementen bevatten.`,
+      );
     }
 
     // Controleer alle evenementen vóór we iets wegschrijven.
@@ -89,7 +102,9 @@ export const create = mutation({
       const event = await ctx.db.get("events", eventId);
 
       if (!event || event.visibility !== "public" || event.status === "draft") {
-        throw new ConvexError("Een van de gekozen evenementen is niet beschikbaar.");
+        throw new ConvexError(
+          "Een van de gekozen evenementen is niet beschikbaar.",
+        );
       }
 
       getPreset(event.moduleKey, args.presetKey);
@@ -153,7 +168,11 @@ export const previewByCode = query({
       name: poule.name,
       emoji: poule.emoji ?? null,
       ownerName: owner?.name ?? "Onbekend",
-      events: events.map((event) => ({ name: event.name, moduleName: event.moduleName })),
+      events: events.map((event) => ({
+        name: event.name,
+        moduleKey: event.moduleKey,
+        moduleName: event.moduleName,
+      })),
       alreadyMember: membership !== null,
     };
   },
@@ -383,7 +402,8 @@ export const updateSettings = mutation({
       name: args.name?.trim() || poule.name,
       emoji: args.emoji ?? poule.emoji,
       settings: {
-        revealPredictions: args.revealPredictions ?? poule.settings.revealPredictions,
+        revealPredictions:
+          args.revealPredictions ?? poule.settings.revealPredictions,
       },
     });
 
@@ -399,7 +419,9 @@ export const leave = mutation({
     const membership = await requireMembership(ctx, args.pouleId, user._id);
 
     if (membership.role === "owner") {
-      throw new ConvexError("De eigenaar kan de poule niet verlaten. Archiveer de poule in plaats daarvan.");
+      throw new ConvexError(
+        "De eigenaar kan de poule niet verlaten. Archiveer de poule in plaats daarvan.",
+      );
     }
 
     await ctx.db.delete("pouleMembers", membership._id);

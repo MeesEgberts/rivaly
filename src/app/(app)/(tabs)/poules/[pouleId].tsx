@@ -9,6 +9,7 @@ import { NavRow } from "@/components/ui/nav-row";
 import { Screen, Section } from "@/components/ui/screen";
 import { formatInviteCode } from "@/utils/format";
 import { roleLabel } from "@/utils/poule-text";
+import { moduleIcon } from "@/utils/sport-icon";
 
 export default function PouleScreen() {
   const { pouleId } = useLocalSearchParams<{ pouleId: Id<"poules"> }>();
@@ -63,7 +64,7 @@ export default function PouleScreen() {
           {poule.events.map((event) => (
             <NavRow
               key={event._id}
-              icon="sportscourt"
+              icon={moduleIcon(event.moduleKey)}
               title={event.name}
               subtitle={`${event.moduleName} · ${event.presetName}`}
               onPress={() => router.push(`/events/${event._id}`)}
