@@ -18,15 +18,6 @@ export default function ProfileScreen() {
 
   return (
     <Screen>
-      <Section title="Account">
-        <NavRow
-          icon="person.crop.circle.fill"
-          title={me?.name ?? "Speler"}
-          subtitle={me?.email ?? undefined}
-          onPress={() => router.push("/account")}
-        />
-      </Section>
-
       {me?.isAdmin ? (
         <Section title="Platform">
           <NavRow
