@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+  <linearGradient id="gold" x1="300" y1="200" x2="720" y2="820" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#FFF1B0"/>
+    <stop offset="0.35" stop-color="#F7CF4F"/>
+    <stop offset="0.7" stop-color="#E0A526"/>
+    <stop offset="1" stop-color="#B97A12"/>
+  </linearGradient>
+  <linearGradient id="goldSide" x1="332" y1="0" x2="692" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#F9D867"/>
+    <stop offset="0.45" stop-color="#FFE9A0"/>
+    <stop offset="0.75" stop-color="#E9B23A"/>
+    <stop offset="1" stop-color="#C98B1A"/>
+  </linearGradient>
+  <linearGradient id="rim" x1="0" y1="196" x2="0" y2="238" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#FFF4C2"/>
+    <stop offset="1" stop-color="#E7B03A"/>
+  </linearGradient>
+  <linearGradient id="base" x1="0" y1="684" x2="0" y2="812" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#F3C54C"/>
+    <stop offset="1" stop-color="#B57611"/>
+  </linearGradient>
+</defs>
+<path d="M332 220 H692 C694 424 612 560 512 568 C412 560 330 424 332 220 Z" fill="url(#goldSide)"/>
+<path d="M420 236 C410 330 436 440 500 520 C452 500 392 420 382 300 C380 270 380 250 382 236 Z" fill="#FFF6D0" fill-opacity="0.55"/>
+<rect x="314" y="196" width="396" height="42" rx="21" fill="url(#rim)"/></svg>

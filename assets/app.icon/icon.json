@@ -1,0 +1,51 @@
+{
+  "fill": {
+    "automatic-gradient": "extended-srgb:0.17647,0.50196,0.98039,1.00000"
+  },
+  "groups": [
+    {
+      "name": "Cup",
+      "layers": [
+        {
+          "image-name": "cup.svg",
+          "name": "cup"
+        }
+      ],
+      "shadow": {
+        "kind": "layer-color",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    },
+    {
+      "name": "Handles & base",
+      "layers": [
+        {
+          "image-name": "handles.svg",
+          "name": "handles"
+        },
+        {
+          "image-name": "base.svg",
+          "name": "base"
+        }
+      ],
+      "shadow": {
+        "kind": "layer-color",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}
