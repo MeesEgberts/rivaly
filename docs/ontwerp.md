@@ -246,6 +246,12 @@ Daarom staan er eigen tekeningen in `assets/sports/` (`SportIcon` /
 schaatsers (aflossing), bliksem (sprint), lijst (allround); mannen en vrouwen
 als SF-figuurtje.
 
+Beeld (alleen ontwikkeling): `node scripts/fetch-skating-images.mjs` zet
+portretten van schaatsers (Wikidata P18, alleen als de beschrijving over
+schaatsen gaat; anders een Commons-foto met de hele naam in de bestandsnaam),
+een foto van de ijsbaan als banner en het ISU-logo. Schaatsers zonder vrije
+foto houden hun vlag.
+
 ### Invullen per soort evenement
 
 | Soort | Weergave | Invoer |
