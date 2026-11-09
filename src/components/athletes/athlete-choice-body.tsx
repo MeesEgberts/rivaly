@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useEffect, useMemo } from "react";
 
 import { useAthleteDraft } from "@/hooks/use-athlete-draft";
@@ -73,6 +74,15 @@ export function AthleteChoiceBody({ fixture, mode }: Props) {
         active={draft.active}
         infoOf={infoOf}
         onSelect={draft.select}
+        onReplace={(position) =>
+          router.push({
+            pathname:
+              mode === "prediction"
+                ? "/predict/[fixtureId]/replace"
+                : "/result/[fixtureId]/replace",
+            params: { fixtureId: fixture._id, position: String(position) },
+          })
+        }
         onSwap={draft.swap}
       />
       <AthleteChoiceList
@@ -83,7 +93,6 @@ export function AthleteChoiceBody({ fixture, mode }: Props) {
         active={draft.active}
         infoOf={infoOf}
         onPlace={draft.place}
-        onClear={draft.clear}
       />
     </>
   );

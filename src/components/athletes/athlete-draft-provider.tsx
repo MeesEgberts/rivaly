@@ -55,6 +55,16 @@ export function AthleteDraftProvider({ children }: Props) {
     setActive(index);
   }, []);
 
+  const replaceAt = useCallback(
+    (position: number, athlete: AthleteInfo) => {
+      setKnown((current) => new Map(current).set(athlete.id, athlete));
+      const next = placeAt(slots, position, athlete.id);
+      setSlots(next);
+      setActive(firstEmpty(next));
+    },
+    [slots],
+  );
+
   const swap = useCallback(
     (from: number, to: number) => {
       const next = swapSlots(slots, from, to);
@@ -74,9 +84,21 @@ export function AthleteDraftProvider({ children }: Props) {
       place,
       select,
       clear,
+      replaceAt,
       swap,
     }),
-    [slots, active, known, isStarted, start, place, select, clear, swap],
+    [
+      slots,
+      active,
+      known,
+      isStarted,
+      start,
+      place,
+      select,
+      clear,
+      replaceAt,
+      swap,
+    ],
   );
 
   return (

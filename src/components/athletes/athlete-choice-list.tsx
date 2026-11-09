@@ -1,6 +1,6 @@
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/cards/card";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -19,7 +19,6 @@ interface Props {
   active: number | null;
   infoOf: (id: string) => AthleteInfo;
   onPlace: (athlete: AthleteInfo) => void;
-  onClear: (position: number) => void;
 }
 
 /**
@@ -34,7 +33,6 @@ export function AthleteChoiceList({
   active,
   infoOf,
   onPlace,
-  onClear,
 }: Props) {
   const colors = useAppColors();
   const [search, setSearch] = useState("");
@@ -45,7 +43,6 @@ export function AthleteChoiceList({
     chosen: slots,
   });
 
-  const occupant = active !== null ? slots[active] : null;
   const hint = choiceHint(slots, active, (id) => infoOf(id).shortName);
   const target =
     active === null ? null : slots.length > 1 ? `Plek ${active + 1}` : "Kies";
@@ -74,17 +71,6 @@ export function AthleteChoiceList({
           >
             {hint}
           </Text>
-          {occupant && active !== null ? (
-            <Pressable
-              onPress={() => onClear(active)}
-              hitSlop={8}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.clear, { color: colors.danger }]}>
-                Haal weg
-              </Text>
-            </Pressable>
-          ) : null}
         </View>
         {active !== null ? (
           <AthleteSearchField
@@ -125,7 +111,6 @@ const styles = StyleSheet.create({
   hintRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   hint: { flex: 1, fontSize: 17, fontWeight: "700" },
   done: { flex: 1, fontSize: 15, lineHeight: 20 },
-  clear: { fontSize: 15, fontWeight: "600" },
   section: {
     fontSize: 12,
     fontWeight: "600",

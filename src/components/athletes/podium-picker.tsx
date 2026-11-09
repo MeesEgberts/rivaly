@@ -16,7 +16,10 @@ interface Props {
   slots: Slots;
   active: number | null;
   infoOf: (id: string) => AthleteInfo;
+  /** Tik op een lege plek: die plek wordt de plek die je kiest. */
   onSelect: (position: number) => void;
+  /** Tik op een gevulde plek: open het vervangscherm. */
+  onReplace: (position: number) => void;
   onSwap: (from: number, to: number) => void;
 }
 
@@ -30,8 +33,12 @@ export function PodiumPicker({
   active,
   infoOf,
   onSelect,
+  onReplace,
   onSwap,
 }: Props) {
+  const tapSlot = (position: number) =>
+    slots[position] ? onReplace(position) : onSelect(position);
+
   const colors = useAppColors();
   const size = slots.length;
   const layout = useMemo(() => podiumLayout(size), [size]);
@@ -80,7 +87,7 @@ export function PodiumPicker({
           <SingleChoiceSlot
             athlete={slots[0] ? infoOf(slots[0]) : null}
             isActive={active === 0}
-            onPress={() => onSelect(0)}
+            onPress={() => tapSlot(0)}
           />
         ) : (
           <View style={styles.podium}>
@@ -107,7 +114,7 @@ export function PodiumPicker({
                     isActive={active === position}
                     centers={centers}
                     layout={layout}
-                    onSelect={onSelect}
+                    onSelect={tapSlot}
                     onDrop={onSwap}
                   />
                 </View>

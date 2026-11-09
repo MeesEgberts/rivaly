@@ -127,7 +127,9 @@ van gebruikte atleten mee in de deelnemerslijsten van `events.get` en
 podium, daaronder één lijst), zowel bij voorspellen als bij het invoeren van
 een uitslag. Het podium toont de treden 2–1–3 (of 4–2–1–3–5 bij een top 5);
 de blauwe trede is de plek die je nu kiest. Tik een renner in de lijst en
-hij komt daar; tik een gevulde trede om hem te vervangen; houd een renner
+hij komt daar; tik een gevulde trede om hem te vervangen (eigen scherm
+"Vervang X" met de native zoekbalk onderaan en een prullenbak om de plek
+leeg te maken); houd een renner
 vast en sleep hem naar een andere trede om te wisselen. De lijst heeft
 bovenaan een zoekveld (`athletes.search`, met landfilter) en toont zonder
 zoekterm de favorieten; gekozen renners staan er niet nog eens in. Is alles

@@ -212,7 +212,7 @@ export function choiceHint(
     }
 
     const what = slots.length === 3 ? "podium" : `top ${slots.length}`;
-    return `Je ${what} staat. Tik een trede om iemand te vervangen.`;
+    return `Je ${what} staat. Tik een renner om hem te vervangen.`;
   }
 
   const occupant = slots[active];

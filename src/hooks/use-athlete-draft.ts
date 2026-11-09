@@ -18,6 +18,8 @@ export interface AthleteDraft {
   /** Tik op een trede: die plek wordt actief (nog eens tikken: niet meer). */
   select: (index: number) => void;
   clear: (index: number) => void;
+  /** Vervangt de atleet op een gevulde plek (vanuit het vervangscherm). */
+  replaceAt: (position: number, athlete: AthleteInfo) => void;
   swap: (from: number, to: number) => void;
 }
 
